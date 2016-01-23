@@ -255,4 +255,249 @@ for(l in 1:length(multiColor))
   
 }
 
-#left off on line 281
+
+#relate MEs to traits
+row.names(MEs)<-lib_names
+
+#TW 
+samples<-read.table("Data/GA_RNAandLibraries.txt",sep="\t",header=T,stringsAsFactors=F)
+samples<-samples[-28,]
+exper1<-read.table("Data/sample_and_library_names.csv",sep=",", row.names=1,stringsAsFactors=F,header=T)
+TW_traits<-data.frame(cbind(c(exper1$Genotype,samples$Genotype),c(exper1$Sample1,samples$Sample1),c(exper1$sample2,samples$Treatment),c(1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2)))
+names(TW_traits)<-c("genotype","woodtype","GA","year")
+row.names(TW_traits)<-c(row.names(exper1),samples$Name)
+
+TW_MEs<-merge(TW_traits,MEs,by.x="row.names",by.y="row.names")
+row.names(TW_MEs)<-TW_MEs[,1]
+TW_MEs<-TW_MEs[,-1]
+
+TW_ME_cor<-data.frame(matrix(vector(), 0, 4, dimnames=list(c(), c("genotype","woodtype","GA","year"))), stringsAsFactors=F)
+for (e in 1:4)
+{
+  count=1
+  for(k in 5:15)
+  {
+    TW_ME_cor[count,1:4]<-anova(lm(TW_MEs[,k]~genotype+woodtype+GA+year,data=TW_MEs))[1:4,5]
+    row.names(TW_ME_cor)[count]<-names(TW_MEs)[k]
+    count=count+1
+  }
+}
+
+my_palette <- colorRampPalette(c("white", "red"))(n = 12)
+
+pdf(file="Data/consensus_modules_TWtrait_heatmap.pdf",w=8,h=8)
+par(mar=c(5,10,5,1))
+labeledHeatmap(Matrix = -log10(TW_ME_cor),
+               xLabels = names(TW_ME_cor),
+               yLabels = row.names(TW_ME_cor),
+               ySymbols = row.names(TW_ME_cor),
+               colorLabels = TRUE,
+               colors = my_palette,
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(0,50),
+               main = paste("Module-trait relationships"))
+dev.off()
+
+#########################
+#PT association
+
+tis<-c("phloem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem")
+tree<-c("t0","t0","t0","t1","t1","t2","t2","t3","t3","t4","t4","t5","t5","t6","t6")
+pt_lib<-names(data)[57:71]
+PT_traits<-data.frame(cbind(pt_lib,tis,tree))
+
+PT_MEs<-merge(PT_traits,MEs,by.x="pt_lib",by.y="row.names")
+row.names(PT_MEs)<-PT_MEs[,1]
+PT_MEs<-PT_MEs[,-1]
+
+PT_ME_cor<-data.frame(matrix(vector(), 0, 2, dimnames=list(c(), c("tissue","tree"))), stringsAsFactors=F)
+for (e in 1:2)
+{
+  count=1
+  for(k in 3:ncol(PT_MEs))
+  {
+    PT_ME_cor[count,1:2]<-anova(lm(PT_MEs[,k]~tis+tree,data=PT_MEs))[1:2,5]
+    row.names(PT_ME_cor)[count]<-names(PT_MEs)[k]
+    count=count+1
+  }
+}
+
+my_palette <- colorRampPalette(c("white", "red"))(n = 12)
+
+pdf(file="Data/consensus_modules_PTtrait_heatmap.pdf",w=8,h=8)
+par(mar=c(5,10,5,1))
+labeledHeatmap(Matrix = -log10(PT_ME_cor),
+               xLabels = names(PT_ME_cor),
+               yLabels = row.names(PT_ME_cor),
+               ySymbols = row.names(PT_ME_cor),
+               colorLabels = TRUE,
+               colors = my_palette,
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(0,20),
+               main = paste("Module-trait relationships"))
+dev.off()
+
+
+#########
+#mansfield Module associations
+sample_loc<-read.table("Data/provenance_sample_locations.txt",sep="\t",header=T)
+
+man_MEs<-merge(sample_loc,MEs,by.x="row.names",by.y="row.names")
+row.names(man_MEs)<-man_MEs[,1]
+man_MEs<-man_MEs[,-c(1,2)]
+
+man_ME_cor<-data.frame(matrix(vector(), 0, 2, dimnames=list(c(), c("longitude","latitude"))), stringsAsFactors=F)
+for (e in 1:2)
+{
+  count=1
+  for(k in 5:ncol(man_MEs))
+  {
+    man_ME_cor[count,1:2]<-anova(lm(man_MEs[,k]~Longitude+Latitude,data=man_MEs))[1:2,5]
+    row.names(man_ME_cor)[count]<-names(man_MEs)[k]
+    count=count+1
+  }
+}
+
+my_palette <- colorRampPalette(c("white", "red"))(n = 12)
+
+pdf(file="Data/consensus_modules_ProvenanceTrait_heatmap.pdf",w=8,h=8)
+par(mar=c(5,10,5,1))
+labeledHeatmap(Matrix = -log10(man_ME_cor),
+               xLabels = names(man_ME_cor),
+               yLabels = row.names(man_ME_cor),
+               ySymbols = row.names(man_ME_cor),
+               colorLabels = TRUE,
+               colors = my_palette,
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(0,20),
+               main = paste("Module-trait relationships"))
+dev.off()
+
+#########
+#mtsai Module associations
+sample_tsai<-read.table("Data/Tsai_SUT4_RNAseq.txt",sep="\t",header=T)
+
+tsai_MEs<-merge(sample_tsai,MEs,by.x="Run_s",by.y="row.names")
+row.names(tsai_MEs)<-tsai_MEs[,1]
+
+#relevel genotype
+tsai_MEs$genotype_s<-factor(tsai_MEs$genotype_s, levels = c("wild type","SUT4-RNAi transgenic"))
+
+#relevel genotype
+tsai_MEs$tissue_s<-factor(tsai_MEs$tissue_s, levels = c("leaf LPI-15","root","bark","xylem"))
+
+
+tsai_ME_cor<-data.frame(matrix(vector(), 0, 3, dimnames=list(c(), c("genotype","tissue","treatment"))), stringsAsFactors=F)
+for (e in 1:3)
+{
+  count=1
+  for(k in 33:ncol(tsai_MEs))
+  {
+    tsai_ME_cor[count,1:3]<-anova(lm(tsai_MEs[,k]~genotype_s+tissue_s+treatment_s,data=tsai_MEs))[1:3,5]
+    row.names(tsai_ME_cor)[count]<-names(tsai_MEs)[k]
+    count=count+1
+  }
+}
+
+my_palette <- colorRampPalette(c("white", "red"))(n = 12)
+
+pdf(file="Data/consensus_modules_tsaitrait_heatmap.pdf",w=8,h=8)
+par(mar=c(5,10,5,1))
+labeledHeatmap(Matrix = -log10(tsai_ME_cor),
+               xLabels = names(tsai_ME_cor),
+               yLabels = row.names(tsai_ME_cor),
+               ySymbols = row.names(tsai_ME_cor),
+               colorLabels = TRUE,
+               colors = my_palette,
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(0,20),
+               main = paste("Module-trait relationships"))
+dev.off()
+
+########################################
+#chip enrichment of modules
+out.anno<-data.frame(cbind(row.names(data),consColors))
+
+tf_data<-read.table("Data/TF_binding.txt",sep="\t",header=T)
+row.names(tf_data)<-tf_data[,1]
+tf<-tf_data[row.names(data),]
+tf<-tf[,c("gene","ark1B","ark2B","blrB","pcnB","revB","polB")]
+
+#create empty dataframe
+tf_binding<-data.frame(matrix(vector(), 0, 7, dimnames=list(c(), c("Module","ark1","ark2","blr","pcn","rev","pol2"))), stringsAsFactors=F)
+
+for (j in 2:ncol(tf)){
+  
+  ugene<-row.names(tf)[which(tf[,j]!=0)]
+  
+  n_chip<-length(ugene)
+  n_no_chip<-nrow(tf)-n_chip
+  count=1
+  for (i in unique(out.anno[,2]))
+  {
+    n1<-length(unique(out.anno[which(out.anno$consColors==i),1]))
+    n2<-length(intersect(unique(out.anno[which(out.anno$consColors==i),1]), ugene))
+    p<-phyper(n2,n_chip,n_no_chip,n1,lower.tail=FALSE)
+    
+    tf_binding[count,1]<-i
+    tf_binding[count,j]<-p
+    count<-count+1
+  }
+}
+
+row.names(tf_binding)<-paste("ME",tf_binding[,1],sep="")
+tf_binding<-tf_binding[c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"),]
+
+pdf(file="Data/consensus_modules_binding_heatmap.pdf",w=8,h=8)
+par(mar=c(5,10,5,1))
+labeledHeatmap(Matrix = -log10(tf_binding[,2:ncol(tf_binding)]),
+               xLabels = names(tf_binding)[2:ncol(tf_binding)],
+               yLabels = paste("ME",tf_binding[,1],sep=""),
+               ySymbols = paste("ME",tf_binding[,1],sep=""),
+               colorLabels = TRUE,
+               colors = my_palette,
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(0,20),
+               main = paste("Module-binding relationships"))
+dev.off()
+
+
+###################
+#combine all results
+
+comb<-merge(TW_ME_cor,PT_ME_cor,by.x="row.names",by.y="row.names")
+comb<-merge(comb,man_ME_cor,by.x="Row.names",by.y="row.names")
+comb<-merge(comb,tsai_ME_cor,by.x="Row.names",by.y="row.names")
+comb<-merge(comb,tf_binding[,-1],by.x="Row.names",by.y="row.names")
+row.names(comb)<-comb[,1]
+comb<-comb[rev(METree$labels[METree$order]),]
+
+#remove grey
+comb<-comb[-which(row.names(comb)=="MEgrey"),]
+
+pdf(file="Data/consensus_modules_allTraits_heatmap.pdf",w=10,h=8)
+par(mar=c(5,10,5,1))
+labeledHeatmap(Matrix = -log10(comb[,-c(1)]),
+               xLabels = names(comb)[-c(1)],
+               yLabels = comb[,1],
+               ySymbols = comb[,1],
+               colorLabels = TRUE,
+               colors = my_palette,
+               #textMatrix = textMatrix,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(0,20),
+               xLabelsAngle = 90,
+               main = paste("Module-binding relationships"))
+dev.off()
+
