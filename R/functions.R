@@ -143,3 +143,94 @@ peaks2genes<-function(peaks,genes=NA,n=3,max_distance=NA)
 }
 
 
+#--------------------------------------------------------------------------------------
+#
+# PlotExpPCsCor
+#
+#--------------------------------------------------------------------------------------
+# Modified PlotCorPCs 
+
+PlotExpPCsCor = function(PCs, Titles, ColorLabels = FALSE, colors = NULL, IncludeSign = FALSE,  IncludeGrey = TRUE, setMargins = FALSE, PlotDiagAdj = FALSE, plotConsensus=TRUE,...)
+{
+  
+  #print(PlotDiagAdj);
+  
+  if (is.null(colors)) 
+    if (IncludeSign)
+    {
+      colors = RedWhiteGreen(50);
+    } else {
+      colors = heat.colors(30);
+    }
+  NSets = length(PCs);
+  #cex = par("cex");
+  cex=0.5
+  mar = par("mar");
+  
+  #par(cex = cex);
+  if (!IncludeGrey)
+  {
+    for (set in 1:NSets)
+      PCs[[set]]$data = PCs[[set]]$data[ , substring(names(PCs[[set]]$data),3)!="grey"]
+  }
+  
+  if(plotConsensus)
+  {
+    par(mfrow = c(1, (NSets+1)));
+    
+    Cons<-list()
+    Cons[[1]]<-PCs[[1]]
+    #Cons[[1]]$data<-PCs[[1]]$data
+    for (set in 2:NSets)
+    {
+      Cons[[1]]$data<-rbind(Cons[[1]]$data,PCs[[set]]$data)
+    }
+    for(sets in 1:NSets+1)
+    {
+      Cons[[sets]]<-PCs[[sets-1]]
+    }
+    Titles=c("Consensus",Titles)
+    No.Sets<-NSets+1
+    PCs<-Cons
+  } else { 
+    No.Sets<-NSets
+    par(mfrow = c(1, No.Sets));
+  }
+  
+  
+  
+  for (i.col in (1:No.Sets))
+  {
+    par(cex = cex);
+    if (setMargins) {
+      if (ColorLabels) {
+        par(mar = c(1,2,3,4)+0.2);
+      } else {
+        par(mar = c(6,7,3,5)+0.2);
+      }
+    } else {
+      par(mar = mar);
+    }
+    No.Modules = dim(PCs[[i.col]]$data)[2]
+    
+    corPC = cor(PCs[[i.col]]$data, use="p") 
+    if (IncludeSign)
+    {
+      if (PlotDiagAdj) {
+        HeatmapWithTextLabels((1+corPC)/2, names(PCs[[i.col]]$data), names(PCs[[i.col]]$data),
+                              main=Titles[[i.col]], InvertColors=TRUE, zlim=c(0,1.0),
+                              ColorLabels = ColorLabels, colors = colors, SetMargins = FALSE, ...);
+      } else {
+        HeatmapWithTextLabels(corPC, names(PCs[[i.col]]$data), names(PCs[[i.col]]$data),
+                              main=Titles[[i.col]], InvertColors=TRUE, zlim=c(-1,1.0),
+                              ColorLabels = ColorLabels, colors = colors, SetMargins = FALSE, ...);
+      }
+    } else {
+      HeatmapWithTextLabels(abs(corPC), names(PCs[[i.col]]$data), names(PCs[[i.col]]$data),
+                            main=Titles[[i.col]], InvertColors=TRUE, zlim=c(0,1.0),
+                            ColorLabels = ColorLabels, colors = colors, SetMargins = FALSE, ...);
+    }
+    
+  }
+  
+}

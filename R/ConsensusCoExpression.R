@@ -6,14 +6,14 @@ library(RColorBrewer)
 library(preprocessCore)
 source("~/R/tensionwood/module_GO_enrichment.R")
 source("/biodata/pipeline/Rscripts/GOstat//GO_populus.R")
-source("../networkFunctions-extras-05.R");
+source("../R/networkFunctions-extras-05.R");
 allowWGCNAThreads(n=8);
 options(stringsAsFactors = FALSE);
 
 # #gravitropism experiment
 # Data1<-read.table("Data/Gravitropism_normALLrpkm.txt",sep="\t",stringsAsFactors=F)
 # 
-# #xylem/phloem named PT_datExpr0
+# #PT Woody Tissue named PT_datExpr0
 # load(file='Data/PT_WGCNA_data.rdata')
 # Data2<-data.frame(t(PT_datExpr0))
 # rm(PT_datExpr0); rm(PT_moduleColors)
@@ -162,6 +162,12 @@ labels=merge$colors;
 #save(merge, labels, file="Data/merge-labels.RData");
 load("Data/merge-labels.RData")
 
+###############
+#
+#Plot Figure 2A: Dendrogram and Consensus module identification
+#
+################
+
 pdf(file="Data/consensusDendro.pdf",wi=10,5);
 plotDendroAndColors(mods$dendrograms[[1]], labels2colors(labels[mods$goodGenes]),
                     "Consensus",
@@ -169,10 +175,11 @@ plotDendroAndColors(mods$dendrograms[[1]], labels2colors(labels[mods$goodGenes])
                     dendroLabels = FALSE,
                     addGuide = TRUE, hang = 0.01, abHeight = 0.99,
                     guideHang = 0.03, marAll =c(1,5,1,1));
-#If plotting into a file, close it 
 dev.off();
 
-#plot eigengenes
+
+
+#Create Eigengene network for Consensus modules
 MEs0 = multiSetMEs(multiExpr, universalColors = labels2colors(labels))
 
 MEs<-orderMEs(rbind(MEs0[[1]]$data,MEs0[[2]]$data,MEs0[[3]]$data,MEs0[[4]]$data))
@@ -180,15 +187,50 @@ MEs<-orderMEs(rbind(MEs0[[1]]$data,MEs0[[2]]$data,MEs0[[3]]$data,MEs0[[4]]$data)
 MEDiss = 1-cor(MEs);
 # Cluster module eigengenes
 METree = hclust(as.dist(MEDiss), method = "average");
-# Plot the result
-sizeGrWindow(7, 6)
-pdf(file="Data/ME_Dendro.pdf",10,10)
 
-plot(as.dendrogram(METree), horiz=TRUE, main = "Clustering of module eigengenes", xlab = "", sub = "",cex = 0.8)
+###############
+#
+#Plot Figure 2B: Consensus and Individual Eigenegene dendrogram
+#
+################
+
+pdf(file="Data/Experiments_ME_Dendro.pdf",w=10,h=2)
+par(mfrow = c(1, 5))
+
+plot(as.dendrogram(METree), horiz=FALSE, main = "Consensus", xlab = "", sub = "",cex = 0.8)
+
+dataset_labels<-c("Gravitropism","Drought","Provenance","Woody Tissues")
+for(r in 1:4)
+{
+  tmpMEDiss = 1-cor(orderMEs(MEs0[[r]]$data));
+  # Cluster module eigengenes
+  tmpMETree = hclust(as.dist(tmpMEDiss), method = "average");
+  plot(as.dendrogram(tmpMETree), horiz=FALSE, main = dataset_labels[r], xlab = "", sub = "",cex = 0.8)
+}
 dev.off()
 
-#relate consensus modules to original modules
 
+###############
+#
+#Plot Figure 2C: Ordered ME correlations for Consensus and individual experiments
+#
+################
+
+oMEs<-orderMEs(MEs0)
+pdf(file="Data/Experiment_MEcor.pdf",w=10,h=2)
+PlotExpPCsCor(oMEs,dataset_labels,IncludeSign=TRUE,setMargins=TRUE,plotConsensus=TRUE)
+dev.off()
+
+
+###############
+#
+#Plot Figure 2D: Identify Global and Experiment specific co-expression relationships
+#
+################
+
+pdf(file="Data/Consensus_module_ExperMod_heatmap.pdf",w=10,h=3)
+par(mfrow=c(1,length(multiColor)));
+par(cex = 0.8);
 for(l in 1:length(multiColor))
 {
   # Convert the numeric module labels to color labels
@@ -217,28 +259,17 @@ for(l in 1:length(multiColor))
     }
   }
   
-  
-  #=====================================================================================
-  #
-  #  Code chunk 5
-  #
-  #=====================================================================================
-  
-  
   # Truncate p values smaller than 10^{-50} to 10^{-50} 
   pTable[is.infinite(pTable)] = 1.3*max(pTable[is.finite(pTable)]);
   pTable[pTable>100 ] = 100 ;
   # Marginal counts (really module sizes)
   TWModTotals = apply(CountTbl, 1, sum)
   consModTotals = apply(CountTbl, 2, sum)
-  # Actual plotting
-  sizeGrWindow(10,7 );
-  par(mfrow=c(1,1));
-  par(cex = 1.0);
+  
   #par(mar=c(20, 15, 2.7, 1)+0.3);
   # Use function labeledHeatmap to produce the color-coded table with all the trimmings
-  pdf(file=paste("Data/",names(multiColor)[l],"_connsensus_module_comp_heatmap.pdf",sep=""),w=7,h=10)
-  par(mar=c(10,15,5,1))
+  
+  #par(mar=c(10,15,5,1))
   labeledHeatmap(Matrix = t(pTable),
                  yLabels = paste(" ", consModules),
                  xLabels = paste(" ", TWModules),
@@ -246,14 +277,15 @@ for(l in 1:length(multiColor))
                  #ySymbols = paste("Cons ", consModules, ": ", consModTotals, sep=""),
                  #xSymbols = paste(setLabels[l]," ", TWModules, ": ", TWModTotals, sep=""),
                  #textMatrix = CountTbl,
-                 ySymbols = paste(consModules, ": ", consModTotals, sep=""),
+                 ySymbols = consModules,
                  xSymbols = TWModules,
                  colors = greenWhiteRed(100)[50:100],
-                 main = paste("Correspondence of ",setLabels[l]," set-specific and consensus modules",sep=""),
-                 cex.text = 1.0, cex.lab = 1.0, setStdMargins = FALSE);
-  dev.off()
+                 main = dataset_labels[l],
+                 cex.text = 0.8, cex.lab = 0.8, setStdMargins = FALSE);
+  
   
 }
+dev.off()
 
 
 #relate MEs to traits
@@ -343,7 +375,7 @@ dev.off()
 
 
 #########
-#mansfield Module associations
+#Provenance Module associations
 sample_loc<-read.table("Data/provenance_sample_locations.txt",sep="\t",header=T)
 
 man_MEs<-merge(sample_loc,MEs,by.x="row.names",by.y="row.names")
