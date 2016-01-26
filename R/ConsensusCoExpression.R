@@ -4,10 +4,11 @@ library(edgeR)
 library(WGCNA) 
 library(RColorBrewer)
 library(preprocessCore)
-source("~/R/tensionwood/module_GO_enrichment.R")
-source("/biodata/pipeline/Rscripts/GOstat//GO_populus.R")
-source("../R/networkFunctions-extras-05.R");
-allowWGCNAThreads(n=8);
+#source("~/R/tensionwood/module_GO_enrichment.R")
+#source("/biodata/pipeline/Rscripts/GOstat//GO_populus.R")
+source("R/networkFunctions-extras-05.R")
+source("R/NetworkFunctions-Mouse.R")
+allowWGCNAThreads(n=2);
 options(stringsAsFactors = FALSE);
 
 # #gravitropism experiment
@@ -86,6 +87,7 @@ for(set in 1:nSets)
 
 # Save the results
 save(powerTables,file="Data/scaleFreeAnalysis-powerTables.RData");
+load("Data/scaleFreeAnalysis-powerTables.RData")
 collectGarbage();
 
 #Re-format results for plotting
