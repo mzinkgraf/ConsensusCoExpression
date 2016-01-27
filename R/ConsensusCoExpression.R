@@ -676,3 +676,32 @@ labeledHeatmap(Matrix = -log10(fp_binding[,2:ncol(fp_binding)]),
                main = paste("Module-DNase relationships"))
 dev.off()
 
+
+###############
+#
+#Plot Figure 6:
+#
+################
+
+row.names(out.anno)<-out.anno[,1]
+para<-read.table("Data/version3_duplications.out",sep=",",header=T)
+
+para[,9]<-out.anno[para[,1],2]
+para[,10]<-out.anno[para[,2],2]
+para[is.na(para)]<-"grey"
+
+tmp<-chisq.test(para[,9],para[,10])
+
+resid<-as.matrix(tmp$stdres)
+
+pdf(file="Data/results/Paralog_module.pdf",w=8,h=6)
+labeledHeatmap(Matrix = resid,
+               xLabels =dimnames(resid)[[1]],
+               yLabels =dimnames(resid)[[2]],
+               ySymbols =dimnames(resid)[[2]],
+               colorLabels = FALSE,
+               colors= greenWhiteRed(50),
+               setStdMargins = FALSE,
+               cex.text= 0.5,
+               zlim =c(-25,25))
+dev.off()
