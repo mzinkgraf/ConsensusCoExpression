@@ -296,7 +296,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 3: Plot the Consensus eigengene network against treatments for each experiment
+#Plot Figure 4: Plot the Consensus eigengene network against treatments for each experiment
 #
 ################
 
@@ -486,7 +486,7 @@ load("Data/results/Module_GO.rdata")
 
 ###############
 #
-#Plot Figure 4: Functional enrichment of Consensus module using GO analysis
+#Plot Figure 5: Functional enrichment of Consensus module using GO analysis
 #buid heatmap showing differences in GO enrichment for auxin, cell-wall, hormone and meristem
 #
 ################
@@ -560,7 +560,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 5:
+#Plot Figure 6:
 #
 ################
 
@@ -679,7 +679,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 6:
+#Plot Figure 7:
 #
 ################
 
