@@ -600,7 +600,7 @@ for (j in 2:ncol(tf)){
 row.names(tf_binding)<-paste("ME",tf_binding[,1],sep="")
 tf_binding<-tf_binding[c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"),]
 
-pdf(file="Data/consensus_modules_TFbinding_heatmap.pdf",w=8,h=6)
+pdf(file="Data/results/consensus_modules_TFbinding_heatmap.pdf",w=8,h=6)
 par(mar=c(5,10,5,1))
 labeledHeatmap(Matrix = -log10(tf_binding[,2:ncol(tf_binding)]),
                xLabels = names(tf_binding)[2:ncol(tf_binding)],
@@ -628,13 +628,13 @@ names(FPB)<-c("V1", "fpN", "fpB", "fpOS", "fpuS", "fpdS", "fpOE", "fpin", "fpOA"
 
 #add remaining genes that did not have a target
 pt_genes<-read.table("Data/pt210_gene_features.txt",sep="\t",header=T)
-tmp<-merge(FPB,pt,by.x="V1",by.y="geneID",all.y=T)
-tmp<-tmp[,-strand]
+tmp<-merge(FPB,pt_genes,by.x="V1",by.y="geneID",all.y=T)
+
 tmp[which(is.na(tmp[,2])),2:9]=0
 
 row.names(tmp)<-tmp[,1]
 fp<-tmp[out.anno$V1,]
-fp<-fp[,-c(2,3,10,11,12)]
+fp<-fp[,-c(2,3,10,11,12,13)]
 
 #create empty dataframe
 fp_binding<-data.frame(matrix(vector(), 0, 7, dimnames=list(c(), c("Module","fpOS", "fpuS", "fpdS", "fpOE", "fpin", "fpOA"))), stringsAsFactors=F)
