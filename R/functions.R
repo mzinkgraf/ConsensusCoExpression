@@ -142,6 +142,151 @@ peaks2genes<-function(peaks,genes=NA,n=3,max_distance=NA)
   return(do.call(rbind.data.frame,out)) 
 }
 
+#---------------------------------------------------------------------------------------------------------
+# HeatmapWithTextLabels.R
+#---------------------------------------------------------------------------------------------------------
+
+#--------------------------------------------------------------------------
+#
+# ReverseRows = function(Matrix)
+#
+#--------------------------------------------------------------------------
+#
+
+
+ReverseRows = function(Matrix)
+{
+  ind = seq(from=dim(Matrix)[1], to=1, by=-1);
+  Matrix[ind,];
+  #Matrix
+}
+
+ReverseVector = function(Vector)
+{
+  ind = seq(from=length(Vector), to=1, by=-1);
+  Vector[ind];
+  #Vector
+}
+
+#--------------------------------------------------------------------------
+#
+# HeatmapWithTextLabels = function ( Matrix, xLabels, yLabels, ... ) { 
+#
+#--------------------------------------------------------------------------
+# This function plots a heatmap of the specified matrix 
+# and labels the x and y axes wit the given labels.
+# It is assumed that the number of entries in xLabels and yLabels is consistent 
+# with the dimensions in.
+# If ColorLabels==TRUE, the labels are not printed and instead interpreted as colors --
+#  -- a simple symbol with the appropriate color is printed instead of the label.
+# The x,yLabels are expected to have the form "..color" as in "MEgrey" or "PCturquoise".
+# xSymbol, ySymbols are additional markers that can be placed next to color labels
+
+HeatmapWithTextLabels = function ( Matrix, xLabels, yLabels = NULL, xSymbols = NULL, ySymbols = NULL, 
+                                   InvertColors=FALSE, ColorLabels = NULL, xColorLabels = FALSE,
+                                   yColorLabels = FALSE,
+                                   SetMargins = TRUE,
+                                   colors = NULL, NumMatrix = NULL, cex.Num = NULL, cex.lab = NULL, 
+                                   plotLegend = TRUE, ... ) 
+{
+  if (!is.null(ColorLabels)) {xColorLabels = ColorLabels; yColorLabels = ColorLabels; }
+  
+  if (is.null(yLabels) & (!is.null(xLabels)) & (dim(Matrix)[1]==dim(Matrix)[2])) 
+    yLabels = xLabels; 
+  if (SetMargins)
+  {
+    if (ColorLabels)
+    {
+      par(mar=c(2,2,3,5)+0.2);
+    } else {
+      par(mar = c(7,7,3,5)+0.2);
+    }
+  }
+  if (is.null(colors)) 
+    #if (IncludeSign)
+    #{
+    #colors = GreenRedWhite(50);
+    #} else {
+    colors = heat.colors(30);
+  #}
+  if (InvertColors) colors = ReverseVector(colors);
+  if (plotLegend)
+  {
+    image.plot(t(ReverseRows(Matrix)), xaxt = "n", xlab="", yaxt="n", ylab="", col=colors, ...);
+  } else {
+    image(z = t(ReverseRows(Matrix)), xaxt = "n", xlab="", yaxt="n", ylab="", col=colors, ...);
+  }
+  axis(1, labels = FALSE, tick = FALSE)
+  axis(2, labels = FALSE, tick = FALSE)
+  axis(3, labels = FALSE, tick = FALSE)
+  axis(4, labels = FALSE, tick = FALSE)
+  nxlabels = length(xLabels)
+  #   plot x axis labels using:
+  #   par("usr")[3] - 0.25 as the vertical placement
+  #   srt = 45 as text rotation angle
+  #   adj = 1 to place right end of text at tick mark
+  #   pd = TRUE to allow for text outside the plot region
+  plotbox = par("usr");
+  xmin = plotbox[1]; xmax = plotbox[2]; ymin = plotbox[3]; yrange = plotbox[4]-ymin;
+  ymax = plotbox[4]; xrange = xmax - xmin;
+  
+  # print(paste("plotbox:", plotbox[1], plotbox[2], plotbox[3], plotbox[4]));
+  
+  nylabels = length(yLabels)
+  axis(2, labels = FALSE, tick = FALSE)
+  xspacing = 1/(nxlabels-1); yspacing = 1/(nylabels-1)
+  # print(paste("nxlabels:", nxlabels));
+  if (!xColorLabels)
+  {
+    if (is.null(cex.lab)) cex.lab = 1;
+    text(((1:nxlabels)-1)*xspacing , ymin - 0.02, srt = 45, 
+         adj = 1, labels = xLabels, xpd = TRUE, cex = cex.lab)
+  } else {
+    rect(((1:nxlabels)-1)*xspacing - xspacing/2, ymin-xspacing*1.2,
+         ((1:nxlabels)-1)*xspacing + xspacing/2, ymin-xspacing*0.2,
+         density = -1,  col = substring(xLabels, 3), border = substring(xLabels, 3), xpd = TRUE)
+    if (!is.null(xSymbols))
+      text ( ((1:nxlabels)-1)*xspacing, ymin-xspacing*1.3, xSymbols, adj = c(0.5, 0), xpd = TRUE);
+  }
+  if (!yColorLabels)
+  {
+    if (is.null(cex.lab)) cex.lab = 1;
+    text(xmin - 0.01*xrange, ((1:nylabels)-1)/(nylabels-1), srt = 0, 
+         adj = 1, labels = ReverseVector(yLabels), xpd = TRUE, cex = cex.lab )
+  } else {
+    rect(xmin-yspacing*1.2, ((nylabels:1)-1)*yspacing - yspacing/2,
+         xmin-yspacing*0.2, ((nylabels:1)-1)*yspacing + yspacing/2, 
+         density = -1,  col = substring(yLabels, 3), border = substring(yLabels, 3), xpd = TRUE)
+    if (!is.null(ySymbols))
+      text (xmin-yspacing*1.2, ((nylabels:1)-1)*yspacing, ySymbols, adj = c(1, 0.5), xpd = TRUE);
+  }
+  
+  if (!is.null(NumMatrix))
+  {
+    if (is.null(cex.Num)) cex.Num = par("cex");
+    #if (dim(NumMatrix)!=dim(Matrix))
+    #  stop("HeatmapWithTextLabels: NumMatrix was given, but has dimensions incompatible with Matrix.");
+    for (rw in 1:dim(Matrix)[1])
+      for (cl in 1:dim(Matrix)[2])
+      {
+        text((cl-1)*xspacing, (dim(Matrix)[1]-rw)*yspacing, 
+             as.character(NumMatrix[rw,cl]), xpd = TRUE, cex = cex.Num, adj = c(0.5, 0.5));
+      }
+  }
+  axis(1, labels = FALSE, tick = FALSE)
+  axis(2, labels = FALSE, tick = FALSE)
+  axis(3, labels = FALSE, tick = FALSE)
+  axis(4, labels = FALSE, tick = FALSE)
+}
+
+RedWhiteGreen = function(n)
+{
+  half = as.integer(n/2);
+  green = c(seq(from=0, to=1, length.out = half), rep(1, times = half+1));
+  red = c(rep(1, times = half+1), seq(from=1, to=0, length.out = half));
+  blue = c(seq(from=0, to=1, length.out = half), 1, seq(from=1, to=0, length.out = half));
+  col = rgb(red, green, blue, maxColorValue = 1);
+}
 
 #--------------------------------------------------------------------------------------
 #
