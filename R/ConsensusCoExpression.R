@@ -300,6 +300,20 @@ dev.off()
 #
 ################
 
+#Network connectivity of consensus modules
+kme<-consensusKME(multiExpr,labels,multiEigengenes = MEs0,consensusQuantile = 0.25,signed=F,excludeGrey=F)
+conKME<-cbind(labels2colors(labels),kme)
+
+tmp<-apply(conKME, 1, function(x) x[ which(names(conKME)==paste("consensus.kME",x[1],sep=""))] )
+
+conKMEcombined<-as.data.frame(cbind(labels2colors(labels),tmp))
+
+conKMEcombined[,1]<-factor(conKMEcombined[,1],levels=c("yellow","blue","turquoise","grey","brown"))
+
+pdf(file="Data/results/Consensus_module_kME.pdf",h=4,w=6)
+boxplot(abs(as.numeric(conKMEcombined[,2]))~conKMEcombined[,1],col=levels(conKMEcombined[,1]), xlab="Consensus Modules", ylab="Gene Connectivity")
+dev.off()
+
 #######
 require(ggplot2)
 require(plyr)
