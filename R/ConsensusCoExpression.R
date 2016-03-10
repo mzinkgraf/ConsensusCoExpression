@@ -301,6 +301,7 @@ dev.off()
 ################
 
 #Network connectivity of consensus modules
+require(reshape)
 kme<-consensusKME(multiExpr,labels,multiEigengenes = MEs0,consensusQuantile = 0.25,signed=F,excludeGrey=F)
 conKME<-cbind(labels2colors(labels),kme)
 
