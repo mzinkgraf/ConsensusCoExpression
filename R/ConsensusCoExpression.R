@@ -449,17 +449,11 @@ allME$EG<-as.numeric(allME$EG)
 allME$coordinate<-as.numeric(allME$coordinate)
 allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"))
 
-plot4<-ggplot(allME,aes(x=coordinate,y=EG,group=meassure,colour=meassure)) + geom_point() +theme_bw() + stat_smooth(method="lm", se=FALSE, colour="black")+ ylab("Gene expression (rpkm)") +xlab("P. trichocarpa Provenance") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + facet_grid(module ~ meassure,scale="free_x")+ scale_y_continuous(limits=c(-0.45,0.85))
+plot4<-ggplot(allME,aes(x=coordinate,y=EG,group=meassure,colour=meassure)) + geom_point(size=1) +theme_bw() + stat_smooth(method="glm", se=TRUE, colour="black",size=0.5)+ ylab("Gene expression (rpkm)") +xlab("P. trichocarpa Provenance") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + facet_grid(module ~ meassure,scale="free_x")+ scale_y_continuous(limits=c(-0.45,0.85))
 
 #print plot
 plot4
 ggsave(file="Data/results/Provenance_allMEline.pdf",plot4,width=4,height=6)
-
-
-
-
-
-
 
 ###############################
 #
