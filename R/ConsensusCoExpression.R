@@ -308,6 +308,7 @@ conKME<-cbind(labels2colors(labels),kme)
 tmp<-apply(conKME, 1, function(x) x[ which(names(conKME)==paste("consensus.kME",x[1],sep=""))] )
 
 conKMEcombined<-as.data.frame(cbind(labels2colors(labels),tmp))
+names(conKMEcombined)<-c("module","kME")
 
 conKMEcombined[,1]<-factor(conKMEcombined[,1],levels=c("yellow","blue","turquoise","brown","grey"))
 
@@ -522,15 +523,15 @@ GOtable<-merge(GOtable,turquoiseGO,by.x="GOBPID",by.y="GOBPID",all=T)
 GOtable<-merge(GOtable,GOtems,by.x="GOBPID",by.y="V1",all.x=T)
 
 #generate order
-o1<-grep("auxin",GOtable$V3)
-o3<-grep("hormone|gibberelli|brassino",GOtable$V3)
+
+o3<-grep("hormone|gibberelli|brassino|auxin",GOtable$V3)
 o4<-grep("cell wall",GOtable$V3)
 o5<-grep("meristem",GOtable$V3)
 o2<-grep("localization",GOtable$V3)
 o6<-grep("replication",GOtable$V3)
 o7<-grep("methylation|histone|chromatin",GOtable$V3)
 
-o<-c(o1,o3,o4,o5,o2,o6,o7)
+o<-c(o3,o4,o5,o2,o6,o7)
 
 #convert to -log10(pvalue)
 GOtable[,2:5]<--log10(GOtable[,2:5])
@@ -544,6 +545,8 @@ results<-results[c("yellow","blue","turquoise","brown"),]
 
 my_palette <- colorRampPalette(c("white", "red"))(n = 8)
 
+vlines<-cumsum(c(length(o3),length(o4),length(o5),length(o2),length(o6),length(o7)))
+
 pdf(file="Data/results/Module_Go_enrichment.pdf",width=8,height=4)
 par(mar = c(6, 8.5, 3, 3));
 labeledHeatmap(Matrix = results,
@@ -551,7 +554,7 @@ labeledHeatmap(Matrix = results,
                yLabels = paste("ME",row.names(results),sep=""),
                yColorLabels = TRUE,
                yColorWidth = 0.05,
-               ySymbols = paste("ME",row.names(results),sep=""),
+               ySymbols = row.names(results),
                colors = my_palette,
                #textMatrix = txt,
                setStdMargins = FALSE,
@@ -560,7 +563,8 @@ labeledHeatmap(Matrix = results,
                cex.lab.x = 0.5,
                xLabelsAngle = 90,
                zlim = c(0,15),
-               main = paste("GO Enrichment of Co-expression Modules")
+               main = paste("GO Enrichment of Co-expression Modules"),
+               verticalSeparator.x = vlines
 )
 
 dev.off()
@@ -713,4 +717,53 @@ labeledHeatmap(Matrix = resid,
                setStdMargins = FALSE,
                cex.text= 0.5,
                zlim =c(-25,25))
+dev.off()
+
+
+
+
+#################
+#get hub genes for yellow by mergeing kME and GO enrichment
+#################
+
+out.anno3<-cbind(conKMEcombined,out.anno2)
+
+#get the significant (<0.01) GO terms from the yellow module
+Gterms<-names(results)[which(results["yellow",]>2)]
+#get cell-wall terms
+cellwallGterms<-names(results)[(vlines[1]+1):vlines[2]]
+
+cellwall_go<-atGO2PotriAnno(cellwallGterms)
+
+yellow_cellwall_GO<-out.anno3[which(out.anno3$consColors=="yellow" & out.anno3$V1 %in% cellwall_go$V2),]
+
+yellow_kME_niGO<-out.anno3[which(out.anno3$consColors=="yellow" & out.anno3$V1 %ni% cellwall_go$V2),]
+
+test<-t.test(abs(as.numeric(yellow_cellwall_GO$kME)),abs(as.numeric(yellow_kME_niGO$kME)),alternative = "greater")
+percent<-100*(test$estimate[1]-test$estimate[2])/test$estimate[2]
+txt<-paste(round(percent,1),"% increase in kME" ,"; p-value = ",signif(test$p.value,3),sep="")
+
+pdf(file="Data/results/Yellow_Hub.pdf",w=6,h=4)
+boxplot(abs(as.numeric(yellow_cellwall_GO$kME)),abs(as.numeric(yellow_kME_niGO$kME)), names=c("Cell-Wall\nGO terms","Other\nYellow Genes"),ylim=c(0,1.2), main="Yellow Hub Gene Analysis",ylab="Module Membership (kME)")
+text(1.5,1.1,txt)
+dev.off()
+
+#####
+#turquoise
+epiGterms<-names(results)[(vlines[5]+1):vlines[6]]
+
+epi_go<-atGO2PotriAnno(epiGterms)
+
+turquoise_epi_GO<-out.anno3[which(out.anno3$consColors=="turquoise" & out.anno3$V1 %in% epi_go$V2),]
+
+turquoise_kME_niGO<-out.anno3[which(out.anno3$consColors=="turquoise" & out.anno3$V1 %ni% epi_go$V2),]
+
+test2<-t.test(abs(as.numeric(turquoise_epi_GO$kME)),abs(as.numeric(turquoise_kME_niGO$kME)),alternative = "greater")
+
+percent2<-100*(test2$estimate[1]-test2$estimate[2])/test2$estimate[2]
+txt2<-paste(round(percent2,1),"% increase in kME" ,"; p-value = ",signif(test2$p.value,3),sep="")
+
+pdf(file="Data/results/Turquoise_Hub.pdf",w=6,h=4)
+boxplot(abs(as.numeric(turquoise_epi_GO$kME)),abs(as.numeric(turquoise_kME_niGO$kME)), names=c("EpiGenetic\nGO terms","Other\nTurquoise Genes"),ylim=c(0,1.2), main="Turquoise Hub Gene Analysis",ylab="Module Membership (kME)")
+text(1.5,1.1,txt2)
 dev.off()

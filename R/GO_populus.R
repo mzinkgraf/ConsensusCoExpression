@@ -143,10 +143,11 @@ atGO2PotriAnno<-function(go_id)
   if(length(go_id)==0)
   {
     return(print("NO arabidopsis GO term was recieved"))
-  } else if (length(go_id)>1) {
-    return(print("More than one GO term was recieved"))
   } else if (length(grep("GO\\:\\d+",go_id,perl=TRUE))!=length(go_id)) {
     return(print("GO term format is incorrect and shoulf be GO:0000000"))
+  } else if (length(go_id)>1) {
+    potri<-unique(mapping$V1[which(mapping$frame.go_id%in%go_id)])
+    return(pt[which(pt$V2 %in% potri),])
   } else {
     potri<-unique(mapping$V1[which(mapping$frame.go_id==go_id)])
     return(pt[which(pt$V2 %in% potri),])
