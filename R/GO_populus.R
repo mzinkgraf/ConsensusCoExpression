@@ -60,15 +60,16 @@ atGOanalysis<-function (genes,pv=0.01)
 {
   # List of packages for function
   .packages = c("GOstats", "GSEABase")
-  source("http://bioconductor.org/biocLite.R")
+
   # Install BioC packages if not already installed
   .inst <- .packages %in% installed.packages()
-  if(length(.packages[!.inst]) > 0) biocLite(.packages[!.inst], quietly=TRUE)
-  
+  if(length(.packages[!.inst]) > 0) 
+    {
+    source("http://bioconductor.org/biocLite.R")
+    biocLite(.packages[!.inst], quietly=TRUE)
+  }
   require("GOstats",quietly = TRUE)
   require("GSEABase",quietly = TRUE)
-  
-  
   
   #remove transcript numbers from AT names
   genes1<-sub("(AT\\d+G\\d+)\\.\\d+","\\1",genes,perl=TRUE)
