@@ -99,7 +99,7 @@ for (set in 1:nSets)
   meanK[,set] = powerTables[[set]]$data[,5];
 }
 # Plot scatterplots of topology indices vs. soft-thresholding power
-colors = c("black", "red", "blue");
+colors = c("black", "red", "blue", "green");
 sizeGrWindow(10, 8);
 
 pdf(file = "Data/results/scaleFreeTopologyAnalysis.pdf", wi = 10, h=8);
@@ -488,12 +488,15 @@ GOturquoise<-atGOanalysis(out.anno2$V10[Iturquoise])
 # Igrey<-which(out.anno2$consColors=="grey")
 # GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
  
-save(GOblue,GObrown,GOyellow,GOturquoise,file="Data/results/Module_GO.rdata")
+#save(GOblue,GObrown,GOyellow,GOturquoise,file="Data/results/Module_GO.rdata")
 
 load("Data/results/Module_GO.rdata")
 
-
-
+require(xlsx)
+write.xlsx(summary(GOblue$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_BP")
+write.xlsx(summary(GObrown$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_BP",append=TRUE)
+write.xlsx(summary(GOturquoise$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_BP",append=TRUE)
+write.xlsx(summary(GOyellow$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_BP", append=TRUE)
 ###############
 #
 #Plot Figure 5: Functional enrichment of Consensus module using GO analysis
