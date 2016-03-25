@@ -81,6 +81,11 @@ nSamples = size$nSamples;
 nGenes = size$nGenes;
 nSets = size$nSets;
 
+#Get soft threshold for individual experiments
+#indMultiExp<-list(gravitropism=list(data=t(Data1)), woodytissue=list(data=t(Data2)), provenance=list(data=t(Data3)),drought=list(data=t(Data4)))
+#save(indMultiExp,file="Data/individual_MultiExp.rdata")
+
+load("individual_MultiExp.rdata")
 powers =c(seq(1,12, by=1));
 powerTables = vector(mode= "list" ,length = nSets);
 for(set in 1:nSets)
