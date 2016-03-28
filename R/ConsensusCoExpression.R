@@ -84,21 +84,22 @@ nSets = size$nSets;
 #Get soft threshold for individual experiments
 #indMultiExp<-list(gravitropism=list(data=t(Data1)), woodytissue=list(data=t(Data2)), provenance=list(data=t(Data3)),drought=list(data=t(Data4)))
 #save(indMultiExp,file="Data/individual_MultiExp.rdata")
-
+nSet=length(indMultiExp)
 load("individual_MultiExp.rdata")
+setLabels<-names(indMultiExp)
 powers =c(seq(1,12, by=1));
-powerTables = vector(mode= "list" ,length = nSets);
-for(set in 1:nSets)
-  powerTables[[set]] =  list(data = pickSoftThreshold(multiExpr[[set]]$data, powerVector=powers,verbose = 2 )[[2]]);
+powerTables = vector(mode= "list" ,length = nSet);
+for(set in 1:nSet)
+  powerTables[[set]] =  list(data = pickSoftThreshold(indMultiExp[[set]]$data, powerVector=powers,verbose = 2 )[[2]]);
 
 # Save the results
-#save(powerTables,file="Data/results/scaleFreeAnalysis-powerTables.RData");
-load("Data/results/scaleFreeAnalysis-powerTables.RData")
+save(powerTables,file="Data/results/scaleFreeAnalysis-powerTables.RData");
+#load("Data/results/scaleFreeAnalysis-powerTables.RData")
 collectGarbage();
 
 #Re-format results for plotting
-meanK = modelFit = matrix(0,length(powers), nSets);
-for (set in 1:nSets)
+meanK = modelFit = matrix(0,length(powers), nSet);
+for (set in 1:nSet)
 {
   modelFit[, set] = -sign(powerTables[[set]]$data[,3])*powerTables[[set]]$data[,2];
   meanK[,set] = powerTables[[set]]$data[,5];
@@ -107,7 +108,7 @@ for (set in 1:nSets)
 colors = c("black", "red", "blue", "green");
 sizeGrWindow(10, 8);
 
-pdf(file = "Data/results/scaleFreeTopologyAnalysis.pdf", wi = 10, h=8);
+pdf(file = "Data/results/scaleFreeTopologyAnalysis.pdf", wi = 8, h=6);
 par(mfrow = c(1,2));
 plot(powers, modelFit[, 1],
      xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",
@@ -116,7 +117,7 @@ addGrid();
 
 # this line corresponds to using an R^2 cut-off of h
 abline(h=0.85,col="red")
-for(set in 2:nSets)
+for(set in 2:nSet)
   points(powers, modelFit[, set], pch = 21, col = colors[set], bg = colors[set]);
 legendClean("bottomright", legend = setLabels, pch = 21, col = colors);
 
@@ -126,7 +127,7 @@ plot(powers, meanK[, 1],
      main = "Mean connectivity", pch = 21, col = 1, bg = 1);
 addGrid();
 
-for(set in 2:nSets)
+for(set in 2:nSet)
   points(powers, meanK[, set], pch = 21, col = colors[set], bg = colors[set]);
 legendClean("topright", legend = setLabels, pch = 21, col = colors);
 
