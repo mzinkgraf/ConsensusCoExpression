@@ -505,6 +505,7 @@ write.xlsx(summary(GOturquoise$CC),file="Data/results/Supplementary_Table_2.xlsx
 write.xlsx(summary(GOyellow$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_BP", append=TRUE)
 write.xlsx(summary(GOyellow$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_MF", append=TRUE)
 write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_CC", append=TRUE)
+
 ###############
 #
 #Plot Figure 5: Functional enrichment of Consensus module using GO analysis
