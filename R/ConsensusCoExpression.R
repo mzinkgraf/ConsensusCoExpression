@@ -585,7 +585,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 6:
+#Plot Figure 6: Enrichment of DNase-seq footprints and binding of transcription factors within consensus modules. 
 #
 ################
 
@@ -704,7 +704,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 7:
+#Plot Figure 7: Frequency of co-occurrence of paralogous genes within the same versus different gene co-expression modules.
 #
 ################
 
