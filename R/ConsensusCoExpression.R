@@ -491,9 +491,20 @@ load("Data/results/Module_GO.rdata")
 
 require(xlsx)
 write.xlsx(summary(GOblue$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_BP")
+write.xlsx(summary(GOblue$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_MF",append = T)
+write.xlsx(summary(GOblue$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_CC",append = T)
+
 write.xlsx(summary(GObrown$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_BP",append=TRUE)
+write.xlsx(summary(GObrown$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_MF",append=TRUE)
+write.xlsx(summary(GObrown$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_CC",append=TRUE)
+
 write.xlsx(summary(GOturquoise$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_BP",append=TRUE)
+write.xlsx(summary(GOturquoise$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_MF",append=TRUE)
+write.xlsx(summary(GOturquoise$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_CC",append=TRUE)
+
 write.xlsx(summary(GOyellow$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_BP", append=TRUE)
+write.xlsx(summary(GOyellow$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_MF", append=TRUE)
+write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_CC", append=TRUE)
 ###############
 #
 #Plot Figure 5: Functional enrichment of Consensus module using GO analysis
@@ -718,8 +729,6 @@ labeledHeatmap(Matrix = resid,
                cex.text= 0.5,
                zlim =c(-25,25))
 dev.off()
-
-
 
 
 #######################
