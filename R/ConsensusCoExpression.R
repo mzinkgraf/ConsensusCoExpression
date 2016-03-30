@@ -1,5 +1,15 @@
+
 #################
-#Consensus CoExpression analysis of Populus RNA-seq 
+#This script provides the code nessisary to generate Consensus CoExpression 
+#analysis of Populus RNA-seq
+
+#Matt Zinkgraf
+#US Forest Servce and UC Davis Computer Science
+
+#################
+
+setwd(".")
+ 
 library(edgeR)
 library(WGCNA) 
 library(RColorBrewer)
