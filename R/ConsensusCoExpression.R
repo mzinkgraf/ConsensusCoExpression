@@ -93,8 +93,8 @@ for(set in 1:nSet)
   powerTables[[set]] =  list(data = pickSoftThreshold(indMultiExp[[set]]$data, powerVector=powers,verbose = 2 )[[2]]);
 
 # Save the results
-save(powerTables,file="Data/results/scaleFreeAnalysis-powerTables.RData");
-#load("Data/results/scaleFreeAnalysis-powerTables.RData")
+#save(powerTables,file="Data/results/scaleFreeAnalysis-powerTables.RData");
+load("Data/results/scaleFreeAnalysis-powerTables.RData")
 collectGarbage();
 
 #Re-format results for plotting
@@ -107,6 +107,13 @@ for (set in 1:nSet)
 # Plot scatterplots of topology indices vs. soft-thresholding power
 colors = c("black", "red", "blue", "green");
 sizeGrWindow(10, 8);
+
+
+#################
+#
+#Plot Figure S1: Soft threshold analysis of individual data sets
+#
+#################
 
 pdf(file = "Data/results/scaleFreeTopologyAnalysis.pdf", wi = 8, h=6);
 par(mfrow = c(1,2));
@@ -133,6 +140,10 @@ legendClean("topright", legend = setLabels, pch = 21, col = colors);
 
 # If plotting into a file, close it
 dev.off();
+
+############################
+#calculate consensus network
+############################
 
 STPowers =c(8,10,12,10);
 
@@ -163,8 +174,9 @@ collectGarbage();
 #save(mods,TOMinfo, file="Data/results/Grand_mods.RData");
 load("Data/results/Grand_mods.RData")
 
+#merge similar modules
 mergeCut = 0.4
-#This function is not working properly
+
 merge= mergeCloseModules(multiExpr, mods$unmergedColors, cutHeight = mergeCut, consensusQuantile = 0.25, getNewUnassdME = TRUE, relabel = TRUE);
 labels=merge$colors;
 
@@ -270,24 +282,19 @@ for(l in 1:length(multiColor))
     }
   }
   
-  # Truncate p values smaller than 10^{-50} to 10^{-50} 
+  # Truncate small p values
   pTable[is.infinite(pTable)] = 1.3*max(pTable[is.finite(pTable)]);
   pTable[pTable>100 ] = 100 ;
   # Marginal counts (really module sizes)
   TWModTotals = apply(CountTbl, 1, sum)
   consModTotals = apply(CountTbl, 2, sum)
   
-  #par(mar=c(20, 15, 2.7, 1)+0.3);
   # Use function labeledHeatmap to produce the color-coded table with all the trimmings
   gry<-which(consModules=="grey")
-  #par(mar=c(10,15,5,1))
   labeledHeatmap(Matrix = t(pTable[,-gry]),
                  yLabels = paste(" ", consModules[-gry]),
                  xLabels = paste(" ", TWModules),
                  colorLabels = TRUE,
-                 #ySymbols = paste("Cons ", consModules, ": ", consModTotals, sep=""),
-                 #xSymbols = paste(setLabels[l]," ", TWModules, ": ", TWModTotals, sep=""),
-                 #textMatrix = CountTbl,
                  ySymbols = consModules[-gry],
                  xSymbols = TWModules,
                  colors = greenWhiteRed(100)[50:100],
@@ -305,22 +312,6 @@ dev.off()
 #Plot Figure 4: Plot the Consensus eigengene network against treatments for each experiment
 #
 ################
-
-#Network connectivity of consensus modules
-require(reshape)
-kme<-consensusKME(multiExpr,labels,multiEigengenes = MEs0,consensusQuantile = 0.25,signed=F,excludeGrey=F)
-conKME<-cbind(labels2colors(labels),kme)
-
-tmp<-apply(conKME, 1, function(x) x[ which(names(conKME)==paste("consensus.kME",x[1],sep=""))] )
-
-conKMEcombined<-as.data.frame(cbind(labels2colors(labels),tmp))
-names(conKMEcombined)<-c("module","kME")
-
-conKMEcombined[,1]<-factor(conKMEcombined[,1],levels=c("yellow","blue","turquoise","brown","grey"))
-
-pdf(file="Data/results/Consensus_module_kME.pdf",h=4,w=6)
-boxplot(abs(as.numeric(conKMEcombined[,2]))~conKMEcombined[,1],col=levels(conKMEcombined[,1]), xlab="Consensus Modules", ylab="Gene Connectivity")
-dev.off()
 
 #######
 require(ggplot2)
@@ -352,7 +343,7 @@ for(j in 5:ncol(TW_MEs))
 
 #plot allME
 names(allME)[1]<-"module"
-allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"))
+allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEbrown"))
 
 plot1<-ggplot(allME,aes(x=woodtype,y=tmp.avg, group=GA, colour=GA)) + geom_line() + geom_errorbar(aes(ymax=tmp.avg+tmp.se, ymin=tmp.avg-tmp.se), width=0.25,size=0.5)+theme_bw() + ylab("Gene expression (rpkm)") +xlab("wood type") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + scale_y_continuous(limits=c(-0.45,0.85)) + facet_grid(module ~ genotype)
 
@@ -391,7 +382,7 @@ for(j in 33:ncol(tsai_MEs))
 
 #plot allME
 names(allME)[1]<-"module"
-allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"))
+allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEbrown"))
 
 plot2<-ggplot(allME,aes(x=tissue_s,y=tmp.avg, group=treatment_s, colour=treatment_s)) + geom_line() + geom_errorbar(aes(ymax=tmp.avg+tmp.se, ymin=tmp.avg-tmp.se), width=0.25,size=0.5)+theme_bw() + ylab("Gene expression (rpkm)") +xlab("wood type") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + scale_y_continuous(limits=c(-0.45,0.85)) + facet_grid(module ~ genotype_s)
 
@@ -423,7 +414,7 @@ for(j in 3:ncol(PT_MEs))
 
 #plot allME
 names(allME)[1]<-"module"
-allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"))
+allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEbrown"))
 
 plot3<-ggplot(allME,aes(x=tis,y=tmp.avg,group=1)) + geom_line() + geom_errorbar(aes(ymax=tmp.avg+tmp.se, ymin=tmp.avg-tmp.se), width=0.25,size=0.5)+theme_bw() + ylab("Gene expression (rpkm)") +xlab("P. trichocarpa tissue") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + scale_y_continuous(limits=c(-0.45,0.85)) + facet_grid(module ~ .)
 
@@ -454,7 +445,7 @@ names(allME)<-c("module","EG","meassure", "coordinate")
 
 allME$EG<-as.numeric(allME$EG)
 allME$coordinate<-as.numeric(allME$coordinate)
-allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEgrey","MEbrown"))
+allME$module<-factor(allME$module, levels = c("MEyellow","MEblue","MEturquoise","MEbrown"))
 
 plot4<-ggplot(allME,aes(x=coordinate,y=EG,group=meassure,colour=meassure)) + geom_point(size=1) +theme_bw() + stat_smooth(method="glm", se=TRUE, colour="black",size=0.5)+ ylab("Gene expression (rpkm)") +xlab("P. trichocarpa Provenance") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + facet_grid(module ~ meassure,scale="free_x")+ scale_y_continuous(limits=c(-0.45,0.85))
 
@@ -731,6 +722,97 @@ dev.off()
 
 
 
+#######################
+#
+#Plot Figure 8: Enrichment of censensus modules for SNPs from two GWAS studies in Populus (Porth et al., 2013; McKnowm et al., 2014)
+#
+#######################
+
+load("Data/GWAS_associations.rdata")
+load("Data/34KarrayGenes.rdata")
+colors<-labels2colors(labels)
+names(colors)<-row.names(data)
+
+x<-unique(associations[,1])
+y<-unique(associations[,2])
+
+#reorder porth traits
+pr<-y[1:16]
+pr<-pr[order(tolower(pr))]
+#reorder Mcknown trait
+mn<-y[17:36]
+mn<-mn[order(mn)]
+trs<-c(pr,mn)
+
+Gt<-length(colors[UarrayGenes])
+Mt<-table(colors[UarrayGenes])
+
+GWAS_enrich<-data.frame(matrix(vector(), length(trs), 5, dimnames=list(trs, c("yellow","blue","brown","turquoise","grey"))), stringsAsFactors=F)
+
+for(i in 1:length(trs))
+{
+  n1<-which(associations$Trait==trs[i])
+  tb<-table(associations[n1,4])
+  
+  if("yellow" %in% names(tb)) GWAS_enrich[i,1]<-phyper(tb[["yellow"]], Mt[["yellow"]], (Gt-Mt[["yellow"]]), length(n1),lower.tail=F) else GWAS_enrich[i,1]<-NA
+  
+  if("blue" %in% names(tb)) GWAS_enrich[i,2]<-phyper(tb[["blue"]], Mt[["blue"]], (Gt-Mt[["blue"]]), length(n1),lower.tail=F) else GWAS_enrich[i,2]<-NA
+  
+  if("brown" %in% names(tb)) GWAS_enrich[i,3]<-phyper(tb[["brown"]], Mt[["brown"]], (Gt-Mt[["brown"]]), length(n1),lower.tail=F) else GWAS_enrich[i,3]<-NA
+  
+  if("turquoise" %in% names(tb)) GWAS_enrich[i,4]<-phyper(tb[["turquoise"]], Mt[["turquoise"]], (Gt-Mt[["turquoise"]]), length(n1),lower.tail=F) else GWAS_enrich[i,4]<-NA
+  
+  if("grey" %in% names(tb)) GWAS_enrich[i,5]<-phyper(tb[["grey"]], Mt[["grey"]], (Gt-Mt[["grey"]]), length(n1),lower.tail=F) else GWAS_enrich[i,5]<-NA
+  
+}
+
+GWAS_enrich[is.na(GWAS_enrich)]<-1
+GWAS_enrich<-GWAS_enrich[,c("yellow","blue","turquoise","grey","brown")]
+
+pdf(file="Data/results/arrayGenesGWAS_modules_enrichment.pdf",width=8,height=4)
+par(mar = c(6, 8.5, 3, 3));
+labeledHeatmap(Matrix = -log10(t(GWAS_enrich)),
+               xLabels = row.names(GWAS_enrich),
+               yLabels = paste("ME",names(GWAS_enrich),sep=""),
+               yColorLabels = TRUE,
+               yColorWidth = 0.05,
+               ySymbols = paste("ME",names(GWAS_enrich),sep=""),
+               colors = colorRampPalette(c("white", "blue"))(n = 8),
+               #textMatrix = txt,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               cex.lab.y = 0.8,
+               cex.lab.x = 0.5,
+               xLabelsAngle = 90,
+               zlim = c(0,15),
+               main = paste("GWAS_enrichment")
+)
+
+dev.off()
+
+
+########################
+#
+#Plot Figure S2: Network connectivity of consensus modules
+#
+########################
+
+require(reshape)
+kme<-consensusKME(multiExpr,labels,multiEigengenes = MEs0,consensusQuantile = 0.25,signed=F,excludeGrey=F)
+conKME<-cbind(labels2colors(labels),kme)
+
+tmp<-apply(conKME, 1, function(x) x[ which(names(conKME)==paste("consensus.kME",x[1],sep=""))] )
+
+conKMEcombined<-as.data.frame(cbind(labels2colors(labels),tmp))
+names(conKMEcombined)<-c("module","kME")
+
+conKMEcombined[,1]<-factor(conKMEcombined[,1],levels=c("yellow","blue","turquoise","brown","grey"))
+
+pdf(file="Data/results/Consensus_module_kME.pdf",h=4,w=6)
+boxplot(abs(as.numeric(conKMEcombined[,2]))~conKMEcombined[,1],col=levels(conKMEcombined[,1]), xlab="Consensus Modules", ylab="Gene Connectivity")
+dev.off()
+
+
 #################
 #get hub genes for yellow by mergeing kME and GO enrichment
 #################
@@ -757,8 +839,10 @@ boxplot(abs(as.numeric(yellow_cellwall_GO$kME)),abs(as.numeric(yellow_kME_niGO$k
 text(1.5,1.1,txt)
 dev.off()
 
-#####
+##########
 #turquoise
+##########
+
 epiGterms<-names(results)[(vlines[5]+1):vlines[6]]
 
 epi_go<-atGO2PotriAnno(epiGterms)
