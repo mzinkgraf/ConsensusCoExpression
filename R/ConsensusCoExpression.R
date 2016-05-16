@@ -742,6 +742,9 @@ dev.off()
 #######################
 
 load("Data/GWAS_associations.rdata")
+
+#need to update associations column 4 to include the new modules
+
 load("Data/34KarrayGenes.rdata")
 colors<-labels2colors(labels)
 names(colors)<-row.names(data)
