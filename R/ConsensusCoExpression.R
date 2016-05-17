@@ -11,7 +11,8 @@
 setwd(".")
  
 library(edgeR)
-library(WGCNA) 
+library(WGCNA)
+require(plyr)
 library(RColorBrewer)
 library(preprocessCore)
 library(fields)
@@ -22,60 +23,60 @@ source("R/functions.R")
 allowWGCNAThreads(n=2);
 options(stringsAsFactors = FALSE);
 
-#gravitropism experiment
-Data1<-read.table("Data/Gravitropism_normALLrpkm.txt",sep="\t",stringsAsFactors=F)
-gsg1<-goodSamplesGenes(t(Data1), verbose=3)
-Data1<-Data1[gsg1$goodGenes,]
-
-
-#PT Woody Tissue named PT_datExpr0
-load(file='Data/PT_WGCNA_data.rdata')
-Data2<-data.frame(t(PT_datExpr0))
-rm(PT_datExpr0); rm(PT_moduleColors)
-gsg2<-goodSamplesGenes(t(Data2), verbose=3)
-Data2<-Data2[gsg2$goodGenes,]
-
-#provenance named datExpr
-load("Data/provenance_xylem.rdata")
-Data3<-data.frame(datExp0)
-rm(datExp0)
-gsg3<-goodSamplesGenes(t(Data3), verbose=3)
-Data3<-Data3[gsg3$goodGenes,]
-
-#tsai named datExpr
-load("Data/Tsai_vascular_rpkm.rdata")
-Data4<-data.frame(datExp0)
-rm(datExp0)
-gsg4<-goodSamplesGenes(t(Data4), verbose=3)
-Data4<-Data4[gsg4$goodGenes,]
- 
-# #combine datasets
-data<-merge(Data1,Data2,by.x="row.names",by.y="row.names")
-data<-merge(data,Data3,by.x="Row.names",by.y="row.names")
-data<-merge(data,Data4,by.x="Row.names",by.y="row.names")
-row.names(data)<-data[,1]
-data<-data[,-1]
-
-
-#load module information from individual analyses
-
-TW_output<-read.table("Data/tensionwood_WGCNAallGENES_moduleSize500.txt",sep="\t",header=T)
-row.names(TW_output)<-TW_output$gene
-TW_mods<-TW_output[row.names(data),2]
-
-pt_output<-read.table("Data/PTRNAseq_WGCNAallGENES_modules.txt",sep="\t",header=T)
-row.names(pt_output)<-pt_output$gene
-PT_mods<-pt_output[row.names(data),2]
-
-man_out<-read.table("Data/provenance_xylem_WGCNAallGENES_modules.txt",sep="\t",header=T)
-row.names(man_out)<-man_out$gene
-man_mods<-man_out[row.names(data),2]
-
-tsai_out<-read.table("Data/Tsai_vascular_drought_module_output.txt",sep="\t",header=T)
-row.names(tsai_out)<-tsai_out$gene
-tsai_mods<-tsai_out[row.names(data),2]
-
-save(data,TW_mods,PT_mods,man_mods,tsai_mods,file="Data/results/Grand_analysis_expressions_mods.rdata")
+# #gravitropism experiment
+# Data1<-read.table("Data/Gravitropism_normALLrpkm.txt",sep="\t",stringsAsFactors=F)
+# gsg1<-goodSamplesGenes(t(Data1), verbose=3)
+# Data1<-Data1[gsg1$goodGenes,]
+# 
+# 
+# #PT Woody Tissue named PT_datExpr0
+# load(file='Data/PT_WGCNA_data.rdata')
+# Data2<-data.frame(t(PT_datExpr0))
+# rm(PT_datExpr0); rm(PT_moduleColors)
+# gsg2<-goodSamplesGenes(t(Data2), verbose=3)
+# Data2<-Data2[gsg2$goodGenes,]
+# 
+# #provenance named datExpr
+# load("Data/provenance_xylem.rdata")
+# Data3<-data.frame(datExp0)
+# rm(datExp0)
+# gsg3<-goodSamplesGenes(t(Data3), verbose=3)
+# Data3<-Data3[gsg3$goodGenes,]
+# 
+# #tsai named datExpr
+# load("Data/Tsai_vascular_rpkm.rdata")
+# Data4<-data.frame(datExp0)
+# rm(datExp0)
+# gsg4<-goodSamplesGenes(t(Data4), verbose=3)
+# Data4<-Data4[gsg4$goodGenes,]
+#  
+# # #combine datasets
+# data<-merge(Data1,Data2,by.x="row.names",by.y="row.names")
+# data<-merge(data,Data3,by.x="Row.names",by.y="row.names")
+# data<-merge(data,Data4,by.x="Row.names",by.y="row.names")
+# row.names(data)<-data[,1]
+# data<-data[,-1]
+# 
+# 
+# #load module information from individual analyses
+# 
+# TW_output<-read.table("Data/tensionwood_WGCNAallGENES_moduleSize500.txt",sep="\t",header=T)
+# row.names(TW_output)<-TW_output$gene
+# TW_mods<-TW_output[row.names(data),2]
+# 
+# pt_output<-read.table("Data/PTRNAseq_WGCNAallGENES_modules.txt",sep="\t",header=T)
+# row.names(pt_output)<-pt_output$gene
+# PT_mods<-pt_output[row.names(data),2]
+# 
+# man_out<-read.table("Data/provenance_xylem_WGCNAallGENES_modules.txt",sep="\t",header=T)
+# row.names(man_out)<-man_out$gene
+# man_mods<-man_out[row.names(data),2]
+# 
+# tsai_out<-read.table("Data/Tsai_vascular_drought_module_output.txt",sep="\t",header=T)
+# row.names(tsai_out)<-tsai_out$gene
+# tsai_mods<-tsai_out[row.names(data),2]
+# 
+# save(data,TW_mods,PT_mods,man_mods,tsai_mods,file="Data/results/Grand_analysis_expressions_mods.rdata")
 
 #load expression and modules
 load("Data/results/Grand_analysis_expressions_mods.rdata")
@@ -96,24 +97,20 @@ nGenes = size$nGenes;
 nSets = size$nSets;
 
 #Get soft threshold for individual experiments
-#indMultiExp<-list(gravitropism=list(data=t(Data1)), woodytissue=list(data=t(Data2)), provenance=list(data=t(Data3)),drought=list(data=t(Data4)))
-#save(indMultiExp,file="Data/individual_MultiExp.rdata")
-load("individual_MultiExp.rdata")\
-nSet=length(indMultiExp)
-setLabels<-names(indMultiExp)
-powers =c(seq(1,12, by=1));
-powerTables = vector(mode= "list" ,length = nSet);
-for(set in 1:nSet)
-  powerTables[[set]] =  list(data = pickSoftThreshold(indMultiExp[[set]]$data, powerVector=powers,verbose = 2 )[[2]]);
 
-# Save the results
-save(powerTables,file="Data/results/scaleFreeAnalysis-powerTables.RData");
+powers = c(c(1:10), seq(from = 12, to=20, by=2))
+# powerTables = vector(mode= "list" ,length = nSet);
+# for(set in 1:nSets)
+#   powerTables[[set]] =  list(data = pickSoftThreshold(multiExpr[[set]]$data, powerVector=powers,verbose = 2 )[[2]]);
+# 
+# # Save the results
+# save(powerTables,file="Data/results/scaleFreeAnalysis-powerTables.RData");
 load("Data/results/scaleFreeAnalysis-powerTables.RData")
 collectGarbage();
 
 #Re-format results for plotting
 meanK = modelFit = matrix(0,length(powers), nSet);
-for (set in 1:nSet)
+for (set in 1:nSets)
 {
   modelFit[, set] = -sign(powerTables[[set]]$data[,3])*powerTables[[set]]$data[,2];
   meanK[,set] = powerTables[[set]]$data[,5];
@@ -125,11 +122,11 @@ sizeGrWindow(10, 8);
 
 #################
 #
-#Plot Figure S1: Soft threshold analysis of individual data sets
+#Plot Figure S1: Soft threshold analysis of individual data sets used in the consensus network
 #
 #################
 
-pdf(file = "Data/results/scaleFreeTopologyAnalysis.pdf", wi = 8, h=6);
+pdf(file = "Data/results/MultiExp_scaleFreeTopologyAnalysis.pdf", wi = 8, h=6);
 par(mfrow = c(1,2));
 plot(powers, modelFit[, 1],
      xlab="Soft Threshold (power)",ylab="Scale Free Topology Model Fit,signed R^2",
@@ -138,7 +135,7 @@ addGrid();
 
 # this line corresponds to using an R^2 cut-off of h
 abline(h=0.85,col="red")
-for(set in 2:nSet)
+for(set in 2:nSets)
   points(powers, modelFit[, set], pch = 21, col = colors[set], bg = colors[set]);
 legendClean("bottomright", legend = setLabels, pch = 21, col = colors);
 
@@ -148,7 +145,7 @@ plot(powers, meanK[, 1],
      main = "Mean connectivity", pch = 21, col = 1, bg = 1);
 addGrid();
 
-for(set in 2:nSet)
+for(set in 2:nSets)
   points(powers, meanK[, set], pch = 21, col = colors[set], bg = colors[set]);
 legendClean("topright", legend = setLabels, pch = 21, col = colors);
 
@@ -159,7 +156,7 @@ dev.off();
 #calculate consensus network
 ############################
 
-STPowers =c(8,10,12,6);
+STPowers =c(8,10,14,12);
 
 TOMinfo_vas = blockwiseIndividualTOMs(multiExpr,
                                   maxBlockSize = 40000,
@@ -195,7 +192,7 @@ merge= mergeCloseModules(multiExpr, mods_vas$unmergedColors, cutHeight = mergeCu
 labels=merge$colors;
 
 #Save the resulting labels for future use
-save(merge, labels, file="Data/results/merge-labels.RData");
+#save(merge, labels, file="Data/results/merge-labels.RData");
 load("Data/results/merge-labels.RData")
 
 ###############
@@ -376,7 +373,7 @@ row.names(tsai_MEs)<-tsai_MEs[,1]
 tsai_MEs$genotype_s<-factor(tsai_MEs$genotype_s, levels = c("wild type","SUT4-RNAi transgenic"))
 
 #relevel genotype
-tsai_MEs$tissue_s<-factor(tsai_MEs$tissue_s, levels = c("leaf LPI-15","root","bark","xylem"))
+tsai_MEs$tissue_s<-factor(tsai_MEs$tissue_s, levels = c("bark","xylem"))
 
 allME<-NULL
 for(j in 33:ncol(tsai_MEs))
@@ -482,21 +479,21 @@ consColors = labels2colors(labels[mods_vas$goodGenes])
 out.anno<-data.frame(cbind(row.names(data),consColors))
 out.anno2<-merge(out.anno,pt,by.x="V1",by.y="V2")
  
-Iblue<-which(out.anno2$consColors=="blue")
-GOblue<-atGOanalysis(out.anno2$V10[Iblue])
-#View(summary(GOblue$BP))
-
-Ibrown<-which(out.anno2$consColors=="brown")
-GObrown<-atGOanalysis(out.anno2$V10[Ibrown])
-#View(summary(GObrown$BP))
-
-Iturquoise<-which(out.anno2$consColors=="turquoise")
-GOturquoise<-atGOanalysis(out.anno2$V10[Iturquoise])
- 
-# Igrey<-which(out.anno2$consColors=="grey")
-# GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
- 
-save(GOblue,GObrown,GOturquoise,file="Data/results/Module_GO.rdata")
+# Iblue<-which(out.anno2$consColors=="blue")
+# GOblue<-atGOanalysis(out.anno2$V10[Iblue])
+# #View(summary(GOblue$BP))
+# 
+# Ibrown<-which(out.anno2$consColors=="brown")
+# GObrown<-atGOanalysis(out.anno2$V10[Ibrown])
+# #View(summary(GObrown$BP))
+# 
+# Iturquoise<-which(out.anno2$consColors=="turquoise")
+# GOturquoise<-atGOanalysis(out.anno2$V10[Iturquoise])
+#  
+# # Igrey<-which(out.anno2$consColors=="grey")
+# # GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
+#  
+# save(GOblue,GObrown,GOturquoise,file="Data/results/Module_GO.rdata")
 
 load("Data/results/Module_GO.rdata")
 
@@ -543,16 +540,17 @@ o3<-grep("hormone|gibberelli|brassino|auxin",GOtable$V3)
 o4<-grep("cell wall",GOtable$V3)
 o5<-grep("meristem",GOtable$V3)
 o2<-grep("localization",GOtable$V3)
-o6<-grep("replication",GOtable$V3)
+#o6<-grep("replication",GOtable$V3)
 o7<-grep("methylation|histone|chromatin",GOtable$V3)
 
-o<-c(o3,o4,o5,o2,o6,o7)
+o<-c(o3,o4,o5,o2,o7)
 
 #convert to -log10(pvalue)
-GOtable[,2:5]<--log10(GOtable[,2:5])
-GOtable[is.na(GOtable)] <- 0
+GOtable[is.na(GOtable)] <- 1
+GOtable[,2:4]<--log10(GOtable[,2:4])
 
-results<-data.frame(t(GOtable[o,2:5]))
+
+results<-data.frame(t(GOtable[o,2:4]))
 names(results)<-GOtable[o,1]
 
 #reorder modules
@@ -560,7 +558,7 @@ results<-results[c("blue","turquoise","brown"),]
 
 my_palette <- colorRampPalette(c("white", "red"))(n = 8)
 
-vlines<-cumsum(c(length(o3),length(o4),length(o5),length(o2),length(o6),length(o7)))
+vlines<-cumsum(c(length(o3),length(o4),length(o5),length(o2),length(o7)))
 
 pdf(file="Data/results/Module_Go_enrichment.pdf",width=8,height=4)
 par(mar = c(6, 8.5, 3, 3));
@@ -731,7 +729,7 @@ labeledHeatmap(Matrix = resid,
                colors= greenWhiteRed(50),
                setStdMargins = FALSE,
                cex.text= 0.5,
-               zlim =c(-25,25))
+               zlim =c(-15,15))
 dev.off()
 
 
@@ -742,15 +740,15 @@ dev.off()
 #######################
 
 load("Data/GWAS_associations.rdata")
+x<-unique(associations[,1])
+y<-unique(associations[,2])
 
-#need to update associations column 4 to include the new modules
+associations<-merge(associations,out.anno,by.x="V1",by.y="V1",all.x=T)
+associations[is.na(associations[,4]),4]<-"grey"
 
 load("Data/34KarrayGenes.rdata")
 colors<-labels2colors(labels)
 names(colors)<-row.names(data)
-
-x<-unique(associations[,1])
-y<-unique(associations[,2])
 
 #reorder porth traits
 pr<-y[1:16]
@@ -785,7 +783,7 @@ GWAS_enrich<-GWAS_enrich[,c("blue","turquoise","grey","brown")]
 
 pdf(file="Data/results/arrayGenesGWAS_modules_enrichment.pdf",width=8,height=4)
 par(mar = c(6, 8.5, 3, 3));
-labeledHeatmap(Matrix = -log10(t(GWAS_enrich)),
+labeledHeatmap(Matrix = -log10(t(GWAS_enrich[trs,])),
                xLabels = row.names(GWAS_enrich),
                yLabels = paste("ME",names(GWAS_enrich),sep=""),
                yColorLabels = TRUE,
@@ -799,7 +797,8 @@ labeledHeatmap(Matrix = -log10(t(GWAS_enrich)),
                cex.lab.x = 0.5,
                xLabelsAngle = 90,
                zlim = c(0,15),
-               main = paste("GWAS_enrichment")
+               main = paste("GWAS_enrichment"),
+               verticalSeparator.x = length(pr)
 )
 
 dev.off()
