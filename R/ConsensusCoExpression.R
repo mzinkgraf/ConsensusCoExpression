@@ -362,6 +362,20 @@ plot1<-ggplot(allME,aes(x=woodtype,y=tmp.avg, group=GA, colour=GA)) + geom_line(
 plot1  
 ggsave(file="Data/results/GraviallMEline.pdf",plot=plot1,width=4,height=6)
 
+#get significance of Gravitropism 
+TW_ME_cor<-data.frame(matrix(vector(), 0, 4, dimnames=list(c(), c("genotype","woodtype","GA","year"))), stringsAsFactors=F)
+for (e in 1:4)
+{
+  count=1
+  for(k in 5:9)
+  {
+    TW_ME_cor[count,1:4]<-anova(lm(TW_MEs[,k]~genotype+woodtype+GA+year,data=TW_MEs))[1:4,5]
+    row.names(TW_ME_cor)[count]<-names(TW_MEs)[k]
+    count=count+1
+  }
+}
+
+
 #############
 #drought
 sample_tsai<-read.table("Data/Tsai_SUT4_RNAseq.txt",sep="\t",header=T)
@@ -401,6 +415,20 @@ plot2<-ggplot(allME,aes(x=tissue_s,y=tmp.avg, group=treatment_s, colour=treatmen
 plot2
 ggsave(file="Data/results/Drought_allMEline.pdf",plot=plot2,width=4.5,height=6)
 
+# get significance of Drought
+tsai_ME_cor<-data.frame(matrix(vector(), 0, 3, dimnames=list(c(), c("genotype","tissue","treatment"))), stringsAsFactors=F)
+for (e in 1:3)
+{
+  count=1
+  for(k in 33:ncol(tsai_MEs))
+  {
+    tsai_ME_cor[count,1:3]<-anova(lm(tsai_MEs[,k]~genotype_s+tissue_s+treatment_s,data=tsai_MEs))[1:3,5]
+    row.names(tsai_ME_cor)[count]<-names(tsai_MEs)[k]
+    count=count+1
+  }
+}
+
+
 #############
 #PT Woody Tissues
 tis<-c("phloem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem","phloem","xylem")
@@ -433,6 +461,20 @@ plot3<-ggplot(allME,aes(x=tis,y=tmp.avg,group=1)) + geom_line() + geom_errorbar(
 plot3
 ggsave(file="Data/results/WoodyTissue_allMEline.pdf",plot=plot3,width=2.5,height=6)
 
+#get significance of woody tissues
+PT_ME_cor<-data.frame(matrix(vector(), 0, 2, dimnames=list(c(), c("tissue","tree"))), stringsAsFactors=F)
+for (e in 1:2)
+{
+  count=1
+  for(k in 3:ncol(PT_MEs))
+  {
+    PT_ME_cor[count,1:2]<-anova(lm(PT_MEs[,k]~tis+tree,data=PT_MEs))[1:2,5]
+    row.names(PT_ME_cor)[count]<-names(PT_MEs)[k]
+    count=count+1
+  }
+}
+
+
 #############
 #Provenance
 
@@ -463,6 +505,19 @@ plot4<-ggplot(allME,aes(x=coordinate,y=EG,group=meassure,colour=meassure)) + geo
 #print plot
 plot4
 ggsave(file="Data/results/Provenance_allMEline.pdf",plot4,width=4,height=6)
+
+#get significance of provenance
+man_ME_cor<-data.frame(matrix(vector(), 0, 3, dimnames=list(c(), c("longitude","latitude","year"))), stringsAsFactors=F)
+for (e in 1:2)
+{
+  count=1
+  for(k in 5:ncol(man_MEs))
+  {
+    man_ME_cor[count,1:3]<-anova(lm(man_MEs[,k]~Longitude + Latitude + year,data=man_MEs))[1:3,5]
+    row.names(man_ME_cor)[count]<-names(man_MEs)[k]
+    count=count+1
+  }
+}
 
 ###############################
 #
