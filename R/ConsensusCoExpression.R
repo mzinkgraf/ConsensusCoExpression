@@ -109,7 +109,7 @@ load("Data/results/scaleFreeAnalysis-powerTables.RData")
 collectGarbage();
 
 #Re-format results for plotting
-meanK = modelFit = matrix(0,length(powers), nSet);
+meanK = modelFit = matrix(0,length(powers), nSets);
 for (set in 1:nSets)
 {
   modelFit[, set] = -sign(powerTables[[set]]$data[,3])*powerTables[[set]]$data[,2];
@@ -354,7 +354,7 @@ for(j in 5:ncol(TW_MEs))
 
 #plot allME
 names(allME)[1]<-"module"
-allME$module<-factor(allME$module, levels = c("MEblue","MEturquoise","MEbrown","MEgrey"))
+allME$module<-factor(allME$module, levels = c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey"))
 
 plot1<-ggplot(allME,aes(x=woodtype,y=tmp.avg, group=GA, colour=GA)) + geom_line() + geom_errorbar(aes(ymax=tmp.avg+tmp.se, ymin=tmp.avg-tmp.se), width=0.25,size=0.5)+theme_bw() + ylab("Gene expression (rpkm)") +xlab("wood type") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + scale_y_continuous(limits=c(-0.45,0.85)) + facet_grid(module ~ genotype)
 
@@ -393,7 +393,7 @@ for(j in 33:ncol(tsai_MEs))
 
 #plot allME
 names(allME)[1]<-"module"
-allME$module<-factor(allME$module, levels = c("MEblue","MEturquoise","MEbrown","MEgrey"))
+allME$module<-factor(allME$module, levels = c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey"))
 
 plot2<-ggplot(allME,aes(x=tissue_s,y=tmp.avg, group=treatment_s, colour=treatment_s)) + geom_line() + geom_errorbar(aes(ymax=tmp.avg+tmp.se, ymin=tmp.avg-tmp.se), width=0.25,size=0.5)+theme_bw() + ylab("Gene expression (rpkm)") +xlab("wood type") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + scale_y_continuous(limits=c(-0.45,0.85)) + facet_grid(module ~ genotype_s)
 
@@ -425,7 +425,7 @@ for(j in 3:ncol(PT_MEs))
 
 #plot allME
 names(allME)[1]<-"module"
-allME$module<-factor(allME$module, levels = c("MEblue","MEturquoise","MEbrown", "MEgrey"))
+allME$module<-factor(allME$module, levels = c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey"))
 
 plot3<-ggplot(allME,aes(x=tis,y=tmp.avg,group=1)) + geom_line() + geom_errorbar(aes(ymax=tmp.avg+tmp.se, ymin=tmp.avg-tmp.se), width=0.25,size=0.5)+theme_bw() + ylab("Gene expression (rpkm)") +xlab("P. trichocarpa tissue") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + scale_y_continuous(limits=c(-0.45,0.85)) + facet_grid(module ~ .)
 
@@ -456,7 +456,7 @@ names(allME)<-c("module","EG","meassure", "coordinate")
 
 allME$EG<-as.numeric(allME$EG)
 allME$coordinate<-as.numeric(allME$coordinate)
-allME$module<-factor(allME$module, levels = c("MEblue","MEturquoise","MEbrown","MEgrey"))
+allME$module<-factor(allME$module, levels = c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey"))
 
 plot4<-ggplot(allME,aes(x=coordinate,y=EG,group=meassure,colour=meassure)) + geom_point(size=1) +theme_bw() + stat_smooth(method="glm", se=TRUE, colour="black",size=0.5)+ ylab("Gene expression (rpkm)") +xlab("P. trichocarpa Provenance") + theme(text = element_text(size=8)) + theme(plot.background = element_blank() ,panel.grid.major = element_blank(),panel.grid.minor = element_blank(),panel.border = element_blank()) + theme(axis.line = element_line(color = 'black',size=0.5))+ scale_fill_grey( start=0.8,end=0.3) + facet_grid(module ~ meassure,scale="free_x")+ scale_y_continuous(limits=c(-0.45,0.85))
 
@@ -489,11 +489,14 @@ out.anno2<-merge(out.anno,pt,by.x="V1",by.y="V2")
 # 
 # Iturquoise<-which(out.anno2$consColors=="turquoise")
 # GOturquoise<-atGOanalysis(out.anno2$V10[Iturquoise])
-#  
+# 
+# Iyellow<-which(out.anno2$consColors=="yellow")
+# GOyellow<-atGOanalysis(out.anno2$V10[Iyellow])
+# 
 # # Igrey<-which(out.anno2$consColors=="grey")
 # # GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
 #  
-# save(GOblue,GObrown,GOturquoise,file="Data/results/Module_GO.rdata")
+# save(GOblue,GObrown,GOturquoise,GOyellow,file="Data/results/Module_GO.rdata")
 
 load("Data/results/Module_GO.rdata")
 
@@ -509,6 +512,10 @@ write.xlsx(summary(GObrown$CC),file="Data/results/Supplementary_Table_2.xlsx",sh
 write.xlsx(summary(GOturquoise$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_BP",append=TRUE)
 write.xlsx(summary(GOturquoise$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_MF",append=TRUE)
 write.xlsx(summary(GOturquoise$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_CC",append=TRUE)
+
+write.xlsx(summary(GOyellow$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_BP",append=TRUE)
+write.xlsx(summary(GOyellow$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_MF",append=TRUE)
+write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_CC",append=TRUE)
 
 ###############
 #
@@ -529,9 +536,13 @@ names(brownGO)[2]<-"brown"
 turquoiseGO<-summary(GOturquoise$BP)[grep(key,summary(GOturquoise$BP)[,7],perl=TRUE),1:2]
 names(turquoiseGO)[2]<-"turquoise"
 
+yellowGO<-summary(GOyellow$BP)[grep(key,summary(GOyellow$BP)[,7],perl=TRUE),1:2]
+names(yellowGO)[2]<-"yellow"
+
 
 GOtable<-merge(blueGO,brownGO,by.x="GOBPID",by.y="GOBPID",all=T)
 GOtable<-merge(GOtable,turquoiseGO,by.x="GOBPID",by.y="GOBPID",all=T)
+GOtable<-merge(GOtable,yellowGO,by.x="GOBPID",by.y="GOBPID",all=T)
 GOtable<-merge(GOtable,GOtems,by.x="GOBPID",by.y="V1",all.x=T)
 
 #generate order
@@ -547,14 +558,14 @@ o<-c(o3,o4,o5,o2,o7)
 
 #convert to -log10(pvalue)
 GOtable[is.na(GOtable)] <- 1
-GOtable[,2:4]<--log10(GOtable[,2:4])
+GOtable[,2:5]<--log10(GOtable[,2:5])
 
 
-results<-data.frame(t(GOtable[o,2:4]))
+results<-data.frame(t(GOtable[o,2:5]))
 names(results)<-GOtable[o,1]
 
 #reorder modules
-results<-results[c("blue","turquoise","brown"),]
+results<-results[c("turquoise","brown","yellow","blue"),]
 
 my_palette <- colorRampPalette(c("white", "red"))(n = 8)
 
@@ -624,7 +635,7 @@ for (j in 2:ncol(tf)){
 }
 
 row.names(tf_binding)<-paste("ME",tf_binding[,1],sep="")
-tf_binding<-tf_binding[c("MEblue","MEturquoise","MEgrey","MEbrown"),]
+tf_binding<-tf_binding[c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey"),]
 
 pdf(file="Data/results/consensus_modules_TFbinding_heatmap.pdf",w=8,h=6)
 par(mar=c(5,10,5,1))
@@ -685,7 +696,7 @@ for (j in 2:ncol(fp)){
 }
 
 row.names(fp_binding)<-paste("ME",fp_binding[,1],sep="")
-fp_binding<-fp_binding[c("MEblue","MEturquoise","MEgrey","MEbrown"),c("Module","fpuS","fpOS","fpin","fpOE","fpdS","fpOA")]
+fp_binding<-fp_binding[c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey"),c("Module","fpuS","fpOS","fpin","fpOE","fpdS","fpOA")]
 
 pdf(file="Data/results/consensus_modules_DNase_enrich_heatmap.pdf",w=8,h=6)
 par(mar=c(5,10,5,1))
@@ -729,7 +740,7 @@ labeledHeatmap(Matrix = resid,
                colors= greenWhiteRed(50),
                setStdMargins = FALSE,
                cex.text= 0.5,
-               zlim =c(-15,15))
+               zlim =c(-10,10))
 dev.off()
 
 
@@ -761,7 +772,7 @@ trs<-c(pr,mn)
 Gt<-length(colors[UarrayGenes])
 Mt<-table(colors[UarrayGenes])
 
-GWAS_enrich<-data.frame(matrix(vector(), length(trs), 4, dimnames=list(trs, c("blue","brown","turquoise","grey"))), stringsAsFactors=F)
+GWAS_enrich<-data.frame(matrix(vector(), length(trs), 5, dimnames=list(trs, c("blue","brown","turquoise","yellow","grey"))), stringsAsFactors=F)
 
 for(i in 1:length(trs))
 {
@@ -774,12 +785,14 @@ for(i in 1:length(trs))
   
   if("turquoise" %in% names(tb)) GWAS_enrich[i,3]<-phyper(tb[["turquoise"]], Mt[["turquoise"]], (Gt-Mt[["turquoise"]]), length(n1),lower.tail=F) else GWAS_enrich[i,3]<-NA
   
-  if("grey" %in% names(tb)) GWAS_enrich[i,4]<-phyper(tb[["grey"]], Mt[["grey"]], (Gt-Mt[["grey"]]), length(n1),lower.tail=F) else GWAS_enrich[i,4]<-NA
+  if("yellow" %in% names(tb)) GWAS_enrich[i,4]<-phyper(tb[["yellow"]], Mt[["yellow"]], (Gt-Mt[["yellow"]]), length(n1),lower.tail=F) else GWAS_enrich[i,4]<-NA
+  
+  if("grey" %in% names(tb)) GWAS_enrich[i,5]<-phyper(tb[["grey"]], Mt[["grey"]], (Gt-Mt[["grey"]]), length(n1),lower.tail=F) else GWAS_enrich[i,5]<-NA
   
 }
 
 GWAS_enrich[is.na(GWAS_enrich)]<-1
-GWAS_enrich<-GWAS_enrich[,c("blue","turquoise","grey","brown")]
+GWAS_enrich<-GWAS_enrich[,c("turquoise","brown","yellow","blue","grey")]
 
 pdf(file="Data/results/arrayGenesGWAS_modules_enrichment.pdf",width=8,height=4)
 par(mar = c(6, 8.5, 3, 3));
@@ -819,7 +832,7 @@ tmp<-apply(conKME, 1, function(x) x[ which(names(conKME)==paste("consensus.kME",
 conKMEcombined<-as.data.frame(cbind(labels2colors(labels),tmp))
 names(conKMEcombined)<-c("module","kME")
 
-conKMEcombined[,1]<-factor(conKMEcombined[,1],levels=c("blue","turquoise","brown","grey"))
+conKMEcombined[,1]<-factor(conKMEcombined[,1],levels=c("turquoise","brown","yellow","blue","grey"))
 
 pdf(file="Data/results/Consensus_module_kME.pdf",h=4,w=6)
 boxplot(abs(as.numeric(conKMEcombined[,2]))~conKMEcombined[,1],col=levels(conKMEcombined[,1]), xlab="Consensus Modules", ylab="Gene Connectivity")
