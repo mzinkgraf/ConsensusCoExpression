@@ -784,7 +784,8 @@ para[is.na(para)]<-"grey"
 
 tmp<-chisq.test(para[,9],para[,10])
 
-resid<-as.matrix(tmp$stdres)
+ord<-c("turquoise","brown","yellow","blue","grey")
+resid<-as.matrix(tmp$stdres)[ord,ord]
 
 pdf(file="Data/results/Paralog_module.pdf",w=8,h=6)
 labeledHeatmap(Matrix = resid,
