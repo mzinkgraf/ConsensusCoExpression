@@ -895,6 +895,26 @@ boxplot(abs(as.numeric(conKMEcombined[,2]))~conKMEcombined[,1],col=levels(conKME
 dev.off()
 
 
+################################
+# generate supplementary table 1
+################################
+
+out<-cbind(row.names(data),multiColor$TW,multiColor$tsai,multiColor$man,multiColor$PT,consColors,conKMEcombined$kME)
+out<-merge(out,pt,by.x="V1",by.y="V2")
+
+out<-out[,-c(8,9,14)]
+names(out)<-c("Gene", "Gravitropism_Modules",	"Drought_Modules",	"Provenance_Modules",	"WoodyTissue_Modules",	"Consensus_Modules",	"Consensus_kME",	"pFAM",	"Panther",	"KOG",	"EC",	"PT_GO",	"ATG",	"Alias",	"Description")
+
+mapping<-read.table("Data/MAPPINGatGO2PotriV3.txt",sep="\t",header=T)
+atGO<-data.frame(ddply(mapping, .(V2), summarise, atGOterms=list(frame.go_id)))
+row.names(atGO)<-atGO[,1]
+
+out[,16]<-apply(out,1,function(x) paste(atGO[sub("(AT\\d+G\\d+)\\.\\d+","\\1",x[13],perl=TRUE),2][[1]], collapse = "; "))
+names(out)[16]<-"AT_GO"
+
+write.table(out[,c(1:12,16,13:15)],file="Data/results/Supplementary_Table_1.txt",sep="\t")
+
+
 #################
 #get hub genes for yellow by mergeing kME and GO enrichment
 #################
