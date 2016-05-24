@@ -233,7 +233,7 @@ par(mfrow = c(1, 5))
 
 plot(as.dendrogram(METree), horiz=FALSE, main = "Consensus", xlab = "", sub = "",cex = 0.8)
 
-dataset_labels<-c("Gravitropism","Drought","Provenance","Woody Tissues")
+dataset_labels<-c("Gravitropism","Woody Tissues","Provenance","Drought")
 for(r in 1:4)
 {
   tmpMEDiss = 1-cor(orderMEs(MEs0[[r]]$data));
@@ -682,7 +682,8 @@ for (j in 2:ncol(tf)){
     n1<-length(unique(out.anno[which(out.anno$consColors==i),1]))
     n2<-length(intersect(unique(out.anno[which(out.anno$consColors==i),1]), ugene))
     p<-phyper(n2,n_chip,n_no_chip,n1,lower.tail=FALSE)
-    
+    #print(n2/n1)
+    #print(p)
     tf_binding[count,1]<-i
     tf_binding[count,j]<-p
     count<-count+1
@@ -699,7 +700,7 @@ labeledHeatmap(Matrix = -log10(tf_binding[,2:ncol(tf_binding)]),
                yLabels = paste("ME",tf_binding[,1],sep=""),
                ySymbols = paste("ME",tf_binding[,1],sep=""),
                colorLabels = TRUE,
-               colors = colorRampPalette(c("white", "red"))(n = 8),
+               colors = colorRampPalette(c("white", "red"))(n = 10),
                #textMatrix = textMatrix,
                setStdMargins = FALSE,
                cex.text = 0.5,
@@ -760,7 +761,7 @@ labeledHeatmap(Matrix = -log10(fp_binding[,2:ncol(fp_binding)]),
                yLabels = paste("ME",fp_binding[,1],sep=""),
                ySymbols = paste("ME",fp_binding[,1],sep=""),
                colorLabels = TRUE,
-               colors = colorRampPalette(c("white", "red"))(n = 8),
+               colors = colorRampPalette(c("white", "red"))(n = 10),
                #textMatrix = textMatrix,
                setStdMargins = FALSE,
                cex.text = 0.5,
@@ -858,7 +859,7 @@ labeledHeatmap(Matrix = -log10(t(GWAS_enrich[trs,])),
                yColorLabels = TRUE,
                yColorWidth = 0.05,
                ySymbols = paste("ME",names(GWAS_enrich),sep=""),
-               colors = colorRampPalette(c("white", "blue"))(n = 8),
+               colors = colorRampPalette(c("white", "blue"))(n = 10),
                #textMatrix = txt,
                setStdMargins = FALSE,
                cex.text = 0.5,
