@@ -1,6 +1,6 @@
 
 #################
-#This script provides the code nessisary to generate Consensus CoExpression 
+#This script provides the code to generate Consensus CoExpression 
 #analysis of Populus RNA-seq
 
 #Matt Zinkgraf
