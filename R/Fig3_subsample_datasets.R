@@ -1,6 +1,6 @@
 
 #################
-#This script provides the code nessisary to generate the subsample analysis 
+#This script provides the code to generate the subsample analysis 
 #of four Populus RNA-seq data sets used in Figure 3
 
 #Matt Zinkgraf
@@ -18,7 +18,6 @@ library(preprocessCore)
 library(fields)
 source("R/networkFunctions-extras-05.R")
 source("R/functions.R")
-#source("R/NetworkFunctions-Mouse.R") #additional functions can be found here but they are not used in this script
 
 allowWGCNAThreads(n=2);
 options(stringsAsFactors = FALSE);
@@ -51,6 +50,7 @@ TOMinfo_vas = blockwiseIndividualTOMs(multiExpr,
                                       maxBlockSize = 40000,
                                       power= STPowers);
 
+#This time we will save the adjacency matrix
 print(system.time( {
   mods_vas = blockwiseConsensusModules(
     multiExpr,
