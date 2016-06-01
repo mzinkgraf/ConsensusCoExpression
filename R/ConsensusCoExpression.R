@@ -4,7 +4,7 @@
 #analysis of Populus RNA-seq
 
 #Matt Zinkgraf
-#US Forest Servce and UC Davis Computer Science
+#US Forest Service and UC Davis Computer Science
 
 #################
 
@@ -18,7 +18,6 @@ library(preprocessCore)
 library(fields)
 source("R/networkFunctions-extras-05.R")
 source("R/functions.R")
-#source("R/NetworkFunctions-Mouse.R") #additional functions can be found here but they are not used in this script
 
 allowWGCNAThreads(n=2);
 options(stringsAsFactors = FALSE);
@@ -117,7 +116,6 @@ for (set in 1:nSets)
 }
 # Plot scatterplots of topology indices vs. soft-thresholding power
 colors = c("black", "red", "blue", "green");
-sizeGrWindow(10, 8);
 
 
 #################
@@ -212,7 +210,7 @@ dev.off();
 
 
 
-#Create Eigengene network for Consensus modules
+#Create Eigengene network for consensus modules
 MEs0 = multiSetMEs(multiExpr, universalColors = labels2colors(labels))
 
 MEs<-orderMEs(rbind(MEs0[[1]]$data,MEs0[[2]]$data,MEs0[[3]]$data,MEs0[[4]]$data))
@@ -224,7 +222,7 @@ METree = hclust(as.dist(MEDiss), method = "average");
 
 ###############
 #
-#Plot Figure 2B: Consensus and Individual Eigenegene dendrogram
+#Plot Figure 2B: Consensus and Individual Eigenegene dendrograms
 #
 ################
 
@@ -246,7 +244,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 2C: Ordered ME correlations for Consensus and individual experiments
+#Plot Figure 2C: ME correlations for consensus and individual experiments
 #
 ################
 
@@ -258,7 +256,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 2D: Identify Global and Experiment specific co-expression relationships
+#Plot Figure 2D: Identify global and experiment specific co-expression relationships
 #
 ################
 
@@ -273,7 +271,7 @@ for(l in 1:length(multiColor))
   consColors= labels2colors(labels[mods_vas$goodGenes])
   consModules<-unique(consColors)
   
-  # Numbers of TW and consensus modules
+  # Numbers of individual and consensus modules
   nTWMods = length(TWModules)
   nConsMods = length(consModules)
   
@@ -320,7 +318,7 @@ dev.off()
 
 ###############
 #
-#Plot Figure 4: Plot the Consensus eigengene network against treatments for each experiment
+#Plot Figure 4: Plot the consensus eigengene network against treatments for each experiment
 #
 ################
 
@@ -574,7 +572,7 @@ write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",s
 
 ###############
 #
-#Plot Figure 5: Functional enrichment of Consensus module using GO analysis
+#Plot Figure 5: Functional enrichment of consensus module using GO analysis
 #buid heatmap showing differences in GO enrichment for auxin, cell-wall, hormone and meristem
 #
 ################
@@ -803,7 +801,7 @@ dev.off()
 
 #######################
 #
-#Plot Figure 8: Enrichment of censensus modules for SNPs from two GWAS studies in Populus (Porth et al., 2013; McKnowm et al., 2014)
+#Plot Figure 8: Enrichment of censensus modules for SNPs from two GWAS studies in Populus (Porth et al., 2013; McKowm et al., 2014)
 #
 #######################
 

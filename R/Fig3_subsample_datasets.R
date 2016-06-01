@@ -4,7 +4,7 @@
 #of four Populus RNA-seq data sets used in Figure 3
 
 #Matt Zinkgraf
-#US Forest Servce and UC Davis Computer Science
+#US Forest Service and UC Davis Computer Science
 
 #################
 
@@ -50,7 +50,7 @@ TOMinfo_vas = blockwiseIndividualTOMs(multiExpr,
                                       maxBlockSize = 40000,
                                       power= STPowers);
 
-#This time we will save the adjacency matrix
+#To save time we will save the adjacency matrix and load it when it is needed
 print(system.time( {
   mods_vas = blockwiseConsensusModules(
     multiExpr,
@@ -139,7 +139,7 @@ for(q in 1:9)
     scaleQuant[set] = quantile(TOMScalingSamples[[set]],
                                probs = scaleP, type = 8);
     
-    # Scale the male TOM
+    # Scale the TOM
     if (set>1)
     {
       scalePowers[set] = log(scaleQuant[1])/log(scaleQuant[set]);
