@@ -525,7 +525,7 @@ for (e in 1:2)
 ###############################
 
 source("R/GO_populus.R")
-GOtems<-read.table("Data/GO_terms.txt",sep="\t")
+GOtems<-read.csv("Data/GO_terms.txt",sep="\t",header=F)
 pt<-read.table("Data/Ptrichocarpa_210_annotation_primary.txt",sep="\t")
 consColors = labels2colors(labels[mods_vas$goodGenes])
 
@@ -546,10 +546,10 @@ out.anno2<-merge(out.anno,pt,by.x="V1",by.y="V2")
 # Iyellow<-which(out.anno2$consColors=="yellow")
 # GOyellow<-atGOanalysis(out.anno2$V10[Iyellow])
 # 
-# # Igrey<-which(out.anno2$consColors=="grey")
-# # GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
+# Igrey<-which(out.anno2$consColors=="grey")
+# GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
 #  
-# save(GOblue,GObrown,GOturquoise,GOyellow,file="Data/results/Module_GO.rdata")
+# save(GOblue,GObrown,GOturquoise,GOyellow,GOgrey,file="Data/results/Module_GO.rdata")
 
 load("Data/results/Module_GO.rdata")
 
@@ -578,7 +578,7 @@ write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",s
 ################
 
 
-key<-"auxin|hormone|gibberelli|brassino|cell wall|meristem|localization|replication|methylation|histone|chromatin"
+key<-"auxin|hormone|gibberelli|brassino|cytokinin|cell wall|meristem|protein localization|methylation|histone|chromatin|cellulose|lignin|xylan|xylose"
 
 blueGO<-summary(GOblue$BP)[grep(key,summary(GOblue$BP)[,7],perl=TRUE),1:2]
 names(blueGO)[2]<-"blue"
@@ -592,42 +592,52 @@ names(turquoiseGO)[2]<-"turquoise"
 yellowGO<-summary(GOyellow$BP)[grep(key,summary(GOyellow$BP)[,7],perl=TRUE),1:2]
 names(yellowGO)[2]<-"yellow"
 
+greyGO<-summary(GOgrey$BP)[grep(key,summary(GOgrey$BP)[,7],perl=TRUE),1:2]
+names(greyGO)[2]<-"grey"
 
 GOtable<-merge(blueGO,brownGO,by.x="GOBPID",by.y="GOBPID",all=T)
 GOtable<-merge(GOtable,turquoiseGO,by.x="GOBPID",by.y="GOBPID",all=T)
 GOtable<-merge(GOtable,yellowGO,by.x="GOBPID",by.y="GOBPID",all=T)
+GOtable<-merge(GOtable,greyGO,by.x="GOBPID",by.y="GOBPID",all=T)
 GOtable<-merge(GOtable,GOtems,by.x="GOBPID",by.y="V1",all.x=T)
 
 #generate order
 
-o3<-grep("hormone|gibberelli|brassino|auxin",GOtable$V3)
+o3<-grep("hormone|gibberelli|brassino|auxin|cytokinin",GOtable$V3)
 o4<-grep("cell wall",GOtable$V3)
 o5<-grep("meristem",GOtable$V3)
-o2<-grep("localization",GOtable$V3)
-#o6<-grep("replication",GOtable$V3)
+o2<-grep("protein localization",GOtable$V3)
 o7<-grep("methylation|histone|chromatin",GOtable$V3)
-
-o<-c(o3,o4,o5,o2,o7)
+o6<-grep("cellulose|lignin|xylan|xylose|glucomannan",GOtable$V3)
+o<-c(o3,o4,o6,o5,o2,o7)
 
 #convert to -log10(pvalue)
 GOtable[is.na(GOtable)] <- 1
-GOtable[,2:5]<--log10(GOtable[,2:5])
+GOtable[,2:6]<--log10(GOtable[,2:6])
 
 
-results<-data.frame(t(GOtable[o,2:5]))
+results<-data.frame(t(GOtable[o,2:6]))
 names(results)<-GOtable[o,1]
 
 #reorder modules
-results<-results[c("turquoise","brown","yellow","blue"),]
+results<-results[c("turquoise","brown","yellow","blue","grey"),]
 
 my_palette <- colorRampPalette(c("white", "red"))(n = 8)
 
-vlines<-cumsum(c(length(o3),length(o4),length(o5),length(o2),length(o7)))
+vlines<-cumsum(c(length(o3),length(o4),length(o6),length(o5),length(o2),length(o7)))
+#make list of group names
+GOgroups<-rep(NA,ncol(results))
+GOgroups[round(length(o3)/2)]<-"hormone"
+GOgroups[round(length(o4)/2)+vlines[1]]<-"cell wall"
+GOgroups[round(length(o6)/2)+vlines[2]]<-"cellulose | lignin | xylose"
+GOgroups[round(length(o5)/2)+vlines[3]]<-"meristem"
+GOgroups[round(length(o2)/2)+vlines[4]]<-"protein localization"
+GOgroups[round(length(o7)/2)+vlines[5]]<-"chromatin | histone | methylation"
 
-pdf(file="Data/results/Module_Go_enrichment.pdf",width=8,height=4)
-par(mar = c(6, 8.5, 3, 3));
+pdf(file="Data/results/Module_Go_enrichment_wGery.pdf",width=8,height=4)
+par(mar = c(9, 8, 2, 2));
 labeledHeatmap(Matrix = results,
-               xLabels = names(results),
+               xLabels = GOgroups,
                yLabels = paste("ME",row.names(results),sep=""),
                yColorLabels = TRUE,
                yColorWidth = 0.05,
@@ -637,8 +647,8 @@ labeledHeatmap(Matrix = results,
                setStdMargins = FALSE,
                cex.text = 0.5,
                cex.lab.y = 0.8,
-               cex.lab.x = 0.5,
-               xLabelsAngle = 90,
+               cex.lab.x = 1,
+               xLabelsAngle = 45,
                zlim = c(0,15),
                main = paste("GO Enrichment of Co-expression Modules"),
                verticalSeparator.x = vlines
