@@ -961,3 +961,46 @@ labeledHeatmap(Matrix = moduleTraitCor[ordM,],
                zlim = c(-1,1),
                main = paste("Consensus module - wood chemistry relationships"))
 dev.off()
+
+#####
+#add porth wood chemistry data from provenance samples
+Pg<-read.table("~/Documents/R/provenance_genotypes.txt",sep="\t",header=T)
+Pchem<-read.csv("~/Documents/R/porth_Wood_chem.csv")
+Pchem$IndividualId<-sub("(\\w+)\\-\\d+","\\1",Pchem$IndividualId,perl=T)
+row.names(Pchem)<-Pchem$IndividualId
+
+Pchem_sub<-Pchem[Pg$genotype,]
+Pchem_sub<-Pchem_sub[!is.na(Pchem_sub$SampleId),]
+Pchem_sub$SampleId<-sub("(\\w{4})\\d+\\-\\d+","\\1",Pchem_sub$IndividualId,perl=T)
+row.names(Pchem_sub)<-Pchem_sub$SampleId
+
+MEs[row.names(Pchem_sub),]
+
+nSamples = nrow(Pchem_sub)
+moduleTraitCor = cor(MEs[row.names(Pchem_sub),], Pchem_sub[,5:22], use = "pairwise.complete.obs");
+
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
+
+
+# Will display correlations and their p-values
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+                   signif(moduleTraitPvalue, 1), ")", sep = "");
+dim(textMatrix) = dim(moduleTraitCor)
+names(textMatrix)<-names(Pchem_sub)[5:22]
+row.names(textMatrix)<-names(MEs)
+ordM<-c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey")
+#pdf(file="Data/results/Consensus_woodChem_cor.pdf",h=6,w=8)
+par(mar = c(6, 8.5, 3, 3));
+# Display the correlation values within a heatmap plot
+labeledHeatmap(Matrix = moduleTraitCor[ordM,],
+               xLabels = names(textMatrix),
+               yLabels = ordM,
+               ySymbols = ordM,
+               colorLabels = FALSE,
+               colors = blueWhiteRed(50),
+               textMatrix = textMatrix[ordM,],
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(-1,1),
+               main = paste("Consensus module - wood chemistry relationships"))
+dev.off()
