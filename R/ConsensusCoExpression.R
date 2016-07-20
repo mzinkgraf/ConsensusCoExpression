@@ -922,3 +922,42 @@ out[,16]<-apply(out,1,function(x) paste(atGO[sub("(AT\\d+G\\d+)\\.\\d+","\\1",x[
 names(out)[16]<-"AT_GO"
 
 write.table(out[,c(1:12,16,13:15)],file="Data/results/Supplementary_Table_1.txt",sep="\t")
+
+
+
+###############
+#add wood chemistry data set from Gerttula et al. 2015 to project
+
+
+chem_tmp<-read.table("Data/wood_chem_phenotypes.txt",sep="\t",header=T,stringsAsFactors=F)
+row.names(chem_tmp)<-chem_tmp[,1]
+#remove total lignin
+chem<-chem_tmp[,-c(1:5,12)]
+nSamples = nrow(multiExpr$TW$data)
+moduleTraitCor = cor(MEs[1:56,], chem, use = "pairwise.complete.obs");
+
+moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
+
+
+# Will display correlations and their p-values
+textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+                   signif(moduleTraitPvalue, 1), ")", sep = "");
+dim(textMatrix) = dim(moduleTraitCor)
+names(textMatrix)<-names(chem)
+row.names(textMatrix)<-names(MEs)
+ordM<-c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey")
+pdf(file="Data/results/Consensus_woodChem_cor.pdf",h=6,w=8)
+par(mar = c(6, 8.5, 3, 3));
+# Display the correlation values within a heatmap plot
+labeledHeatmap(Matrix = moduleTraitCor[ordM,],
+               xLabels = names(textMatrix),
+               yLabels = ordM,
+               ySymbols = ordM,
+               colorLabels = FALSE,
+               colors = blueWhiteRed(50),
+               textMatrix = textMatrix[ordM,],
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               zlim = c(-1,1),
+               main = paste("Consensus module - wood chemistry relationships"))
+dev.off()
