@@ -934,7 +934,7 @@ row.names(chem_tmp)<-chem_tmp[,1]
 #remove total lignin
 chem<-chem_tmp[,-c(1:5,12)]
 nSamples = nrow(multiExpr$TW$data)
-moduleTraitCor = cor(MEs[1:56,], chem, use = "pairwise.complete.obs");
+moduleTraitCor = cor(MEs[row.names(chem),], chem, use = "pairwise.complete.obs");
 
 moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
 
