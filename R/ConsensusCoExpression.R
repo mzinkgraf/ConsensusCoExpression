@@ -248,7 +248,7 @@ dev.off()
 #
 ################
 
-oMEs<-orderMEs(MEs0)
+oMEs<-orderMEs(MEs0,order=c(4,2,5,1,3))
 pdf(file="Data/results/Experiment_MEcor.pdf",w=10,h=2)
 PlotExpPCsCor(oMEs,dataset_labels,IncludeSign=TRUE,setMargins=TRUE,plotConsensus=TRUE)
 dev.off()
@@ -517,6 +517,36 @@ for (e in 1:2)
   }
 }
 
+
+##########
+#
+#plot heatmap of the pvalue significance between ME and experimental treatments
+#
+##########
+
+ME_cor_pvalue<-cbind(TW_ME_cor,tsai_ME_cor,PT_ME_cor,man_ME_cor)
+ME_cor_pvalue<-ME_cor_pvalue[c("MEturquoise","MEbrown","MEyellow","MEblue"),]
+
+pdf(file="Data/results/Module_trait_correlation.pdf",w=8,h=4)
+par(mar = c(9, 8, 2, 2));
+labeledHeatmap(Matrix = -log10(ME_cor_pvalue),
+               xLabels = names(ME_cor_pvalue),
+               yLabels = c("CM1","CM2","CM3","CM4"),
+               yColorLabels = TRUE,
+               yColorWidth = 0.05,
+               ySymbols = c("CM1","CM2","CM3","CM4"),
+               colors = colorRampPalette(c("white", "red"))(n = 8),
+               #textMatrix = txt,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               cex.lab.y = 0.8,
+               cex.lab.x = 1,
+               xLabelsAngle = 90,
+               zlim = c(0,15),
+               main = paste("Module - Trait Correlation")
+)
+dev.off()
+
 ###############################
 #
 # GO analysis of Populus genes using AT best blast hit
@@ -548,27 +578,43 @@ out.anno2<-merge(out.anno,pt,by.x="V1",by.y="V2")
 # 
 # Igrey<-which(out.anno2$consColors=="grey")
 # GOgrey<-atGOanalysis(out.anno2$V10[Igrey])
+#
+#generate 10 random sets the same size a grey
+nGrey<-table(consColors=="grey")[[2]]
+GOrandom<-list()
+for(e in 1:10)
+{
+  random_genes<-sample(out.anno2$V10,nGrey)
+  GOrandom[[e]]<-atGOanalysisBP(random_genes)
+  print(e)
+}
+
 #  
-# save(GOblue,GObrown,GOturquoise,GOyellow,GOgrey,file="Data/results/Module_GO.rdata")
+# save(GOblue,GObrown,GOturquoise,GOyellow,GOgrey,GOrandom,file="Data/results/Module_GO.rdata")
 
 load("Data/results/Module_GO.rdata")
 
 require(xlsx)
-write.xlsx(summary(GOblue$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_BP")
-write.xlsx(summary(GOblue$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_MF",append = T)
-write.xlsx(summary(GOblue$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOblue_CC",append = T)
+write.xlsx(summary(GOblue$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM4_BP")
+write.xlsx(summary(GOblue$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM4_MF",append = T)
+write.xlsx(summary(GOblue$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM4_CC",append = T)
 
-write.xlsx(summary(GObrown$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_BP",append=TRUE)
-write.xlsx(summary(GObrown$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_MF",append=TRUE)
-write.xlsx(summary(GObrown$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GObrown_CC",append=TRUE)
+write.xlsx(summary(GObrown$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM2_BP",append=TRUE)
+write.xlsx(summary(GObrown$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM2_MF",append=TRUE)
+write.xlsx(summary(GObrown$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM2_CC",append=TRUE)
 
-write.xlsx(summary(GOturquoise$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_BP",append=TRUE)
-write.xlsx(summary(GOturquoise$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_MF",append=TRUE)
-write.xlsx(summary(GOturquoise$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOturquoise_CC",append=TRUE)
+write.xlsx(summary(GOturquoise$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM1_BP",append=TRUE)
+write.xlsx(summary(GOturquoise$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM1_MF",append=TRUE)
+write.xlsx(summary(GOturquoise$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM1_CC",append=TRUE)
 
-write.xlsx(summary(GOyellow$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_BP",append=TRUE)
-write.xlsx(summary(GOyellow$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_MF",append=TRUE)
-write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "GOyellow_CC",append=TRUE)
+write.xlsx(summary(GOyellow$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM3_BP",append=TRUE)
+write.xlsx(summary(GOyellow$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM3_MF",append=TRUE)
+write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "CM3_CC",append=TRUE)
+
+write.xlsx(summary(GOgrey$BP),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "nonconserved_BP",append=TRUE)
+write.xlsx(summary(GOgrey$MF),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "nonconserved_MF",append=TRUE)
+write.xlsx(summary(GOgrey$CC),file="Data/results/Supplementary_Table_2.xlsx",sheetName = "nonconserved_CC",append=TRUE)
+
 
 ###############
 #
@@ -578,7 +624,7 @@ write.xlsx(summary(GOyellow$CC),file="Data/results/Supplementary_Table_2.xlsx",s
 ################
 
 
-key<-"auxin|hormone|gibberelli|brassino|cytokinin|cell wall|meristem|protein localization|methylation|histone|chromatin|cellulose|lignin|xylan|xylose"
+key<-"auxin|hormone|gibberelli|brassino|cytokinin|cell wall|meristem|protein localization|methylation|histone|chromatin|cellulose|lignin|xylan|xylose|shoot|xylem|phloem"
 
 blueGO<-summary(GOblue$BP)[grep(key,summary(GOblue$BP)[,7],perl=TRUE),1:2]
 names(blueGO)[2]<-"blue"
@@ -608,8 +654,12 @@ o4<-grep("cell wall",GOtable$V3)
 o5<-grep("meristem",GOtable$V3)
 o2<-grep("protein localization",GOtable$V3)
 o7<-grep("methylation|histone|chromatin",GOtable$V3)
-o6<-grep("cellulose|lignin|xylan|xylose|glucomannan",GOtable$V3)
-o<-c(o3,o4,o6,o5,o2,o7)
+o6<-grep("cellulose|lignin|xylan|xylose",GOtable$V3)
+o8<-grep("shoot|xylem|phloem",GOtable$V3)
+o<-c(o3,o4,o6,o5,o8,o2,o7)
+
+#save GOtable results to supplementary table
+write.xlsx(GOtable[o,],file="Data/results/Supplementary_Table_3.xlsx",sheetName = "GO_summary")
 
 #convert to -log10(pvalue)
 GOtable[is.na(GOtable)] <- 1
@@ -620,21 +670,22 @@ results<-data.frame(t(GOtable[o,2:6]))
 names(results)<-GOtable[o,1]
 
 #reorder modules
-results<-results[c("turquoise","brown","yellow","blue","grey"),]
+results<-results[c("turquoise","brown","yellow","blue"),]
 
 my_palette <- colorRampPalette(c("white", "red"))(n = 8)
 
-vlines<-cumsum(c(length(o3),length(o4),length(o6),length(o5),length(o2),length(o7)))
+vlines<-cumsum(c(length(o3),length(o4),length(o6),length(o5),length(o8),length(o2),length(o7)))
 #make list of group names
 GOgroups<-rep(NA,ncol(results))
 GOgroups[round(length(o3)/2)]<-"hormone"
 GOgroups[round(length(o4)/2)+vlines[1]]<-"cell wall"
-GOgroups[round(length(o6)/2)+vlines[2]]<-"cellulose | lignin | xylose"
+GOgroups[round(length(o6)/2)+vlines[2]]<-"cellulose | lignin | xylan"
 GOgroups[round(length(o5)/2)+vlines[3]]<-"meristem"
-GOgroups[round(length(o2)/2)+vlines[4]]<-"protein localization"
-GOgroups[round(length(o7)/2)+vlines[5]]<-"chromatin | histone | methylation"
+GOgroups[round(length(o8)/2)+vlines[4]]<-"shoot development\nxylem/phloem patterning"
+GOgroups[round(length(o2)/2)+vlines[5]]<-"protein localization"
+GOgroups[round(length(o7)/2)+vlines[6]]<-"chromatin | histone | methylation"
 
-pdf(file="Data/results/Module_Go_enrichment_wGery.pdf",width=8,height=4)
+pdf(file="Data/results/Module_Go_enrichment.pdf",width=8,height=4)
 par(mar = c(9, 8, 2, 2));
 labeledHeatmap(Matrix = results,
                xLabels = GOgroups,
@@ -655,6 +706,78 @@ labeledHeatmap(Matrix = results,
 )
 
 dev.off()
+
+##############
+#
+#Plot supplementary figure showing Grey represents a random set of genes
+#
+##############
+
+#parse each module for key terms
+
+GOtable<-summary(GOgrey$BP)[grep(key,summary(GOgrey$BP)[,7],perl=TRUE),1:2]
+names(GOtable)[2]<-"GOgrey"
+
+for(l in 1:length(GOrandom))
+{
+  GOtmp<-summary(GOrandom[[l]]$BP)[grep(key,summary(GOrandom[[l]]$BP)[,7],perl=TRUE),1:2]
+  names(GOtmp)[2]<-paste("random",l,sep="_")
+  GOtable<-merge(GOtable,GOtmp,by.x="GOBPID",by.y="GOBPID",all=T)
+}
+
+GOtable<-merge(GOtable,GOtems,by.x="GOBPID",by.y="V1",all.x=T)
+
+o3<-grep("hormone|gibberelli|brassino|auxin|cytokinin",GOtable$V3)
+o4<-grep("cell wall",GOtable$V3)
+o5<-grep("meristem",GOtable$V3)
+o2<-grep("protein localization",GOtable$V3)
+o7<-grep("methylation|histone|chromatin",GOtable$V3)
+o6<-grep("cellulose|lignin|xylan|xylose",GOtable$V3)
+o8<-grep("shoot|xylem|phloem",GOtable$V3)
+o<-c(o3,o4,o6,o5,o8,o2,o7)
+
+#convert to -log10(pvalue)
+GOtable[is.na(GOtable)] <- 1
+GOtable[,2:12]<--log10(GOtable[,2:12])
+
+results<-data.frame(t(GOtable[o,2:12]))
+names(results)<-GOtable[o,1]
+
+my_palette <- colorRampPalette(c("white", "red"))(n = 8)
+
+vlines<-cumsum(c(length(o3),length(o4),length(o6),sum(length(o5),length(o8)),length(o2),length(o7)))
+#make list of group names
+GOgroups<-rep(NA,ncol(results))
+GOgroups[round(length(o3)/2)]<-"hormone"
+GOgroups[round(length(o4)/2)+vlines[1]]<-"cell wall"
+GOgroups[round(length(o6)/2)+vlines[2]]<-"cellulose\nlignin\nxylan"
+GOgroups[round(sum(length(o5),length(o8))/2)+vlines[3]]<-"meristem\nshoot development\nxylem/phloem patterning"
+GOgroups[round(length(o2)/2)+vlines[4]]<-"protein localization"
+GOgroups[round(length(o7)/2)+vlines[5]]<-"chromatin\nhistone\nmethylation"
+
+pdf(file="Data/results/GO_compare_grey2random.pdf",width=8,height=4)
+par(mar = c(10, 8, 2, 2));
+labeledHeatmap(Matrix = results,
+               xLabels = GOgroups,
+               yLabels = c("non-conserved",row.names(results)[2:11]),
+               yColorLabels = FALSE,
+               yColorWidth = 0.05,
+               ySymbols = row.names(results),
+               colors = my_palette,
+               #textMatrix = txt,
+               setStdMargins = FALSE,
+               cex.text = 0.5,
+               cex.lab.y = 0.8,
+               cex.lab.x = 1,
+               xLabelsAngle = 90,
+               zlim = c(0,15),
+               main = paste("GO Comparision of Non-Conserved Genes and Random Gene Sets"),
+               verticalSeparator.x = vlines
+)
+
+dev.off()
+
+
 
 
 
@@ -940,25 +1063,25 @@ moduleTraitPvalue = corPvalueStudent(moduleTraitCor, nSamples);
 
 
 # Will display correlations and their p-values
-textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
-                   signif(moduleTraitPvalue, 1), ")", sep = "");
-dim(textMatrix) = dim(moduleTraitCor)
-names(textMatrix)<-names(chem)
-row.names(textMatrix)<-names(MEs)
+#textMatrix = paste(signif(moduleTraitCor, 2), "\n(",
+#                   signif(moduleTraitPvalue, 1), ")", sep = "");
+#dim(textMatrix) = dim(moduleTraitCor)
+#names(textMatrix)<-names(chem)
+#row.names(textMatrix)<-names(MEs)
 ordM<-c("MEturquoise","MEbrown","MEyellow","MEblue","MEgrey")
 pdf(file="Data/results/Consensus_woodChem_cor.pdf",h=6,w=8)
 par(mar = c(6, 8.5, 3, 3));
 # Display the correlation values within a heatmap plot
-labeledHeatmap(Matrix = moduleTraitCor[ordM,],
-               xLabels = names(textMatrix),
+labeledHeatmap(Matrix = -log10(moduleTraitPvalue[ordM,]),
+               xLabels = dimnames(moduleTraitPvalue)[[2]],
                yLabels = ordM,
                ySymbols = ordM,
                colorLabels = FALSE,
-               colors = blueWhiteRed(50),
-               textMatrix = textMatrix[ordM,],
+               colors = colorRampPalette(c("white", "blue"))(n = 10),
+               textMatrix = NULL,
                setStdMargins = FALSE,
                cex.text = 0.5,
-               zlim = c(-1,1),
+               zlim = c(0,15),
                main = paste("Consensus module - wood chemistry relationships"))
 dev.off()
 

@@ -119,6 +119,48 @@ atGOanalysis<-function (genes,pv=0.01)
   
 }
 
+atGOanalysisBP<-function (genes,pv=0.01)
+{
+  # List of packages for function
+  .packages = c("GOstats", "GSEABase")
+  
+  # Install BioC packages if not already installed
+  .inst <- .packages %in% installed.packages()
+  if(length(.packages[!.inst]) > 0) 
+  {
+    source("http://bioconductor.org/biocLite.R")
+    biocLite(.packages[!.inst], quietly=TRUE)
+  }
+  require("GOstats",quietly = TRUE)
+  require("GSEABase",quietly = TRUE)
+  
+  #remove transcript numbers from AT names
+  genes1<-sub("(AT\\d+G\\d+)\\.\\d+","\\1",genes,perl=TRUE)
+  
+  
+  data<-read.table("Data/AT_GO_Universe.txt", sep="\t",header=TRUE)
+  goFrame<-GOFrame(data,organism="Arabidopsis thaliana")
+  goAllFrame<-GOAllFrame(goFrame)
+  
+  gsc <- GeneSetCollection(goAllFrame, setType = GOCollection())
+  universe<-unique(data$frame.gene_id)
+  
+  g_id<-as.character(intersect(data$frame.gene_id,genes1))
+  
+  params_BP <- GSEAGOHyperGParams(name="Annotation Params BP",
+                                  geneSetCollection=gsc,
+                                  geneIds =g_id,
+                                  universeGeneIds = universe,
+                                  ontology = "BP",
+                                  pvalueCutoff = pv,
+                                  conditional = FALSE,
+                                  testDirection = "over")
+  
+  Over_BP <- hyperGTest(params_BP)
+  return(list(BP=Over_BP))
+  
+}
+
 
 atGO2Potri<-function(go_id) 
 {
